@@ -16,8 +16,8 @@ type: software
 version: 1.0.0
 date-released: "2026-09-15"          
 license: GPL-3.0          
-repository-code: "https://github.com/YOUR-USERNAME/speechkit"
-url: "https://github.com/YOUR-USERNAME/speechkit"
+repository-code: "https://github.com/Pivaz-01/speechkit"
+url: "https://github.com/Pivaz-01/speechkit"
 
 authors:
   - given-names: Luca               
@@ -39,10 +39,10 @@ keywords:
 
 # Uncomment once you have a Zenodo DOI (see the README). Use the CONCEPT DOI,
 # the one that always resolves to the newest release, not the version DOI.
-# identifiers:
-#   - type: doi
-#     value: 10.5281/zenodo.XXXXXXX
-#     description: Concept DOI for all versions
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22775433
+    description: Concept DOI for all versions
 
 # Software this tool depends on scientifically, and which should be cited
 # alongside it when you report results.

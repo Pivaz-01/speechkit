@@ -21,7 +21,6 @@ What changed:
 
 from __future__ import annotations
 
-import glob
 import os
 import re
 from typing import Any, Callable
@@ -452,7 +451,30 @@ def align_passage(name, text_path, phonemes_path, tsv_paths, out_path,
                   tag=name, log=log)
 
     if not tsv_paths:
-        log("  (no session TSV files found for this passage)")
+        # Reporting "none found" alone sends people hunting for a bug that is
+        # almost always a filename or a folder mismatch, so say what was looked
+        # for and what is actually sitting there.
+        folder = os.path.dirname(text_path) or "."
+        log(f"  no session files found in {folder}")
+        log(f"  looked for any .tsv whose name contains '{name}'")
+        present = sorted(
+            f for f in os.listdir(folder)
+            if f.lower().endswith(".tsv")) if os.path.isdir(folder) else []
+        if present:
+            log(f"  the folder does contain {len(present)} .tsv file(s), but none "
+                f"mention '{name}':")
+            for f in present[:8]:
+                log(f"      {f}")
+            if len(present) > 8:
+                log(f"      ... and {len(present) - 8} more")
+            log(f"  the passage name has to appear somewhere in the filename, "
+                f"e.g. {name}_speaker01_edited.tsv or "
+                f"speaker01_{name}_edited.tsv")
+        else:
+            log("  no .tsv files in that folder at all. The phoneme stage writes "
+                "them next to the audio, or into its own output folder, so copy "
+                "or move them here first.")
+        log("  nothing written for this passage.")
         return {"passage": name, "sessions": [], "output": None}
 
     blocks: list[str] = []
@@ -520,6 +542,75 @@ def _find_segment_pairs(prefix: str, folder: str) -> dict[str, tuple[str, str]]:
     return pairs
 
 
+
+def find_session_files(prefix: str, folder: str,
+                       log: Callable[[str], None] = lambda *a: None) -> list[str]:
+    """
+    Session TSVs belonging to `prefix`.
+
+    The original convention was "<passage>_*.tsv", which requires recordings to
+    be named passage-first. Speaker-first naming is at least as natural, and a
+    file called speaker01_caterpillar_edited.tsv obviously belongs to the
+    caterpillar passage, so the passage name is accepted anywhere in the stem.
+
+    Prefix matches are preferred, and the looser search only runs when there are
+    none, so an existing passage-first layout behaves exactly as before. A file
+    naming two different passages is skipped rather than guessed at.
+    """
+    try:
+        entries = [f for f in os.listdir(folder) if f.lower().endswith(".tsv")]
+    except OSError:
+        return []
+
+    # the canonical phoneme file is not a session
+    entries = [f for f in entries if not f.startswith(f"{prefix}_phonemes.")]
+
+    strict = [f for f in entries if f.startswith(f"{prefix}_")]
+    if strict:
+        # Mixed conventions in one folder would otherwise drop sessions
+        # silently: the prefix matches win and the rest are never mentioned.
+        ignored = [f for f in entries
+                   if f not in strict and prefix.lower() in os.path.splitext(f)[0].lower()]
+        if ignored:
+            log(f"  WARNING: {len(strict)} file(s) start with '{prefix}_' and are "
+                f"being used, so {len(ignored)} other file(s) mentioning "
+                f"'{prefix}' are being IGNORED:")
+            for f in sorted(ignored):
+                log(f"      {f}")
+            log(f"  use one naming convention for the whole folder, otherwise "
+                f"these sessions are left out of the results.")
+        return [os.path.join(folder, f) for f in sorted(strict)]
+
+    # Other passages present in this folder, so a file mentioning two of them
+    # can be recognised as ambiguous instead of being assigned arbitrarily.
+    others = set()
+    try:
+        for f in os.listdir(folder):
+            m = re.match(r"^(.+)_phonemes(?:-\d+)?\.txt$", f)
+            if m and m.group(1) != prefix:
+                others.add(m.group(1).lower())
+    except OSError:
+        pass
+
+    loose = []
+    for f in entries:
+        stem = os.path.splitext(f)[0].lower()
+        if prefix.lower() not in stem:
+            continue
+        clash = sorted(o for o in others if o in stem)
+        if clash:
+            log(f"  skipping {f}: names both '{prefix}' and "
+                f"'{clash[0]}', so which passage it belongs to is ambiguous. "
+                f"Rename it to start with the passage it is.")
+            continue
+        loose.append(f)
+
+    if loose:
+        log(f"  matched {len(loose)} session file(s) by passage name rather than "
+            f"by prefix")
+    return [os.path.join(folder, f) for f in sorted(loose)]
+
+
 def dedupe_sessions(tsvs, prefer_edited: bool = True) -> list[str]:
     """
     One TSV per recording.
@@ -549,7 +640,8 @@ def dedupe_sessions(tsvs, prefer_edited: bool = True) -> list[str]:
 
 
 def discover_passage(prefix: str, folder: str, output_suffix: str,
-                     prefer_edited: bool = True):
+                     prefer_edited: bool = True,
+                     log: Callable[[str], None] = lambda *a: None):
     text = os.path.join(folder, f"{prefix}.txt")
     phon = os.path.join(folder, f"{prefix}_phonemes.txt")
 
@@ -566,15 +658,15 @@ def discover_passage(prefix: str, folder: str, output_suffix: str,
         first = sorted(pairs, key=lambda d: int(d))[0]
         text, phon = pairs[first]
 
-    tsvs = glob.glob(os.path.join(folder, f"{prefix}_*.tsv"))
-    tsvs = [t for t in tsvs if not os.path.basename(t).startswith(f"{prefix}_phonemes.")]
+    tsvs = find_session_files(prefix, folder, log)
     tsvs = dedupe_sessions(tsvs, prefer_edited)
     out = os.path.join(folder, f"{prefix}{output_suffix}")
     return (prefix, text, phon, tsvs, out)
 
 
 def resolve_jobs(input_dirs, passages=None, output_suffix="_all_aligned.txt",
-                 manual_passages=None, prefer_edited=True):
+                 manual_passages=None, prefer_edited=True,
+                 log: Callable[[str], None] = lambda *a: None):
     """Each job is (name, text_path, phonemes_path, [tsv_paths], out_path)."""
     if manual_passages:
         jobs = []
@@ -590,7 +682,8 @@ def resolve_jobs(input_dirs, passages=None, output_suffix="_all_aligned.txt",
         for folder in input_dirs:
             for prefix in passages:
                 try:
-                    jobs.append(discover_passage(prefix, folder, output_suffix, prefer_edited))
+                    jobs.append(discover_passage(prefix, folder, output_suffix,
+                                             prefer_edited, log))
                 except FileNotFoundError:
                     pass          # this prefix is simply not in this folder
         return jobs
@@ -610,7 +703,8 @@ def resolve_jobs(input_dirs, passages=None, output_suffix="_all_aligned.txt",
                 prefixes.add(m.group(1))
         for prefix in sorted(prefixes):
             try:
-                jobs.append(discover_passage(prefix, folder, output_suffix, prefer_edited))
+                jobs.append(discover_passage(prefix, folder, output_suffix,
+                                             prefer_edited, log))
             except FileNotFoundError:
                 pass
     return jobs
@@ -636,7 +730,8 @@ def run_alignment(cfg: dict[str, Any], log: Callable[[str], None] = print) -> li
     output_suffix = cfg.get("OUTPUT_SUFFIX", "_all_aligned.txt") or "_all_aligned.txt"
     prefer_edited = bool(cfg.get("PREFER_EDITED_TSV", True))
 
-    jobs = resolve_jobs(input_dirs, passages, output_suffix, manual, prefer_edited)
+    jobs = resolve_jobs(input_dirs, passages, output_suffix, manual,
+                        prefer_edited, log)
     if not jobs:
         raise ValueError(
             "no passages found. Each folder needs <passage>.txt with the reference "
@@ -661,5 +756,18 @@ def run_alignment(cfg: dict[str, Any], log: Callable[[str], None] = print) -> li
         log("")
 
     total = sum(len(r["sessions"]) for r in reports)
-    log(f"[done] {len(reports)} passage(s), {total} session(s) aligned")
+    written = [r["output"] for r in reports if r["output"]]
+    if total == 0:
+        # Discovering the passages but aligning nothing is not success, and
+        # reporting it as "[done]" is what makes people look for a missing file.
+        raise ValueError(
+            f"found {len(reports)} passage(s) but no session files, so nothing "
+            f"was written. A session file must be a .tsv sitting in the same "
+            f"folder as <passage>.txt, with the passage name somewhere in its "
+            f"filename. See the log above for what each passage looked for and "
+            f"what was actually in the folder.")
+    log(f"[done] {len(reports)} passage(s), {total} session(s) aligned, "
+        f"{len(written)} file(s) written")
+    for out in written:
+        log(f"       {out}")
     return reports
