@@ -1,10 +1,6 @@
 # GitHub reads this file and adds a "Cite this repository" button to the
 # sidebar of the repo page, which offers APA and BibTeX. Zenodo also reads it
 # when minting a DOI, so the author list on the DOI record comes from here.
-#
-# EDIT THE FOUR LINES MARKED "TODO" AND DELETE THIS COMMENT BLOCK.
-# The format is CFF 1.2.0; validate at https://citation-file-format.github.io
-# YAML is indentation-sensitive: two spaces, never tabs.
 
 cff-version: 1.2.0
 message: If you use this software, please cite it as below.
@@ -18,14 +14,14 @@ abstract: >-
   behind a single local interface.
 type: software
 version: 1.0.0
-date-released: "2026-09-15"          # TODO: the date you tag the release
-license: GPL-3.0-or-later            # TODO: must match your LICENSE file
+date-released: "2026-09-15"          
+license: GPL-3.0          
 repository-code: "https://github.com/YOUR-USERNAME/speechkit"
 url: "https://github.com/YOUR-USERNAME/speechkit"
 
 authors:
-  - given-names: Luca                # TODO: check spelling
-    family-names: YOUR-SURNAME       # TODO
+  - given-names: Luca               
+    family-names: Pivetti       
     # orcid: "https://orcid.org/0000-0000-0000-0000"
     # affiliation: Your Department, Your University
 

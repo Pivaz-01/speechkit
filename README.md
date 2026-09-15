@@ -11,10 +11,6 @@ and together they describe one recording from waveform to per-phoneme accuracy.
 
 It runs entirely on your own machine. No audio is uploaded anywhere.
 
-<!-- Add the images and delete this comment. See docs/README.md first: a
-     screenshot of a real session leaks the study folder path and subject IDs
-     from the file list, so capture from a demo folder with neutral names. -->
-
 ![The acoustics panel](docs/interface.png)
 
 *Choosing the recording type, which determines the settings shown below it.*
@@ -163,7 +159,29 @@ the reviewed one, so you never align the same recording twice.
 ### Files the alignment stage needs
 
 Recognition produces the TSV files, but the reference text is something you
-supply. For each passage, its folder needs:
+supply, and **the TSV files have to end up next to it**. One rule:
+
+> A session file is any `.tsv` in the same folder as `<passage>.txt` with the
+> passage name somewhere in its filename.
+
+The phoneme stage writes TSVs beside the audio, or into its own output folder,
+so they need copying or moving into the passage folder. The name itself needs no
+work: the TSV inherits its name from the recording, and both orderings are
+recognised.
+
+```
+caterpillar_speaker01_edited.tsv       matches
+speaker01_caterpillar_edited.tsv       matches
+DBS_post_caterpillar_01_edited.tsv    matches
+speaker01_recording_edited.tsv         does NOT match: no passage name
+```
+
+Two things the stage does to keep this from going quietly wrong. If one folder
+mixes both orderings, the passage-first files win and the rest are reported as
+ignored rather than dropped in silence. And a file naming two different passages
+is skipped as ambiguous rather than assigned to a guess.
+
+For each passage, its folder needs:
 
 ```
 caterpillar/
@@ -344,8 +362,20 @@ registered in its environment panel.
 1.2 GB, once. `huggingface_hub` caches it under `~/.cache/huggingface`.
 
 **"No passages found" from the alignment stage.** The folder needs both
-`<passage>.txt` and `<passage>_phonemes.txt`, and session files matching
-`<passage>_*.tsv`. The error message lists the exact names it looked for.
+`<passage>.txt` and `<passage>_phonemes.txt`. The error message lists the exact
+names it looked for.
+
+**Alignment says it finished but no `_all_aligned.txt` appeared.** Older
+versions reported this as success. It now raises instead, because finding the
+passages and aligning nothing is not a completed run. The usual cause is TSVs
+still sitting in the audio folder rather than the passage folder. The log prints
+what it searched for and lists every `.tsv` actually present, so the mismatch is
+visible.
+
+**A session is missing from the output.** Check the log for a line beginning
+`WARNING`. If one folder mixes `caterpillar_speaker01.tsv` with
+`speaker01_caterpillar.tsv`, only the first form is used and the others are
+listed as ignored. Rename so the folder uses one convention.
 
 **The editor is empty.** See the note under the pipeline section above.
 
@@ -419,8 +449,7 @@ Author and version metadata live in [`CITATION.cff`](CITATION.cff), which GitHub
 reads to put a **Cite this repository** button in the sidebar. Editing that file
 is enough; the button and the BibTeX below stay in step with it.
 
-<!-- Replace XXXXXXX with your Zenodo concept DOI, the one that always resolves
-     to the newest release, then delete this comment. -->
+<!-- Replace XXXXXXX with your Zenodo concept DOI -->
 
 ```bibtex
 @software{speechkit,
