@@ -1,0 +1,31 @@
+# Python 3.10 to 3.13. Use 3.11 or 3.12 if you are choosing.
+#   below 3.10  librosa will not install (numba dropped 3.9)
+#   3.14+       librosa needs numba >= 0.63, and torch wheels may not exist yet
+# Check with: python -m speechkit env
+
+# Core interface. Nothing here is heavy.
+flask>=3.0
+
+# Acoustic analysis stage.
+numpy>=1.24,<3
+scipy>=1.10
+librosa>=0.10
+soundfile>=0.12
+matplotlib>=3.7
+praat-parselmouth>=0.4.3
+
+# Phoneme recognition stage. torch is the large one; the CPU build is enough
+# unless you have a CUDA card, and `pip install torch` picks the right wheel
+# for your platform.
+torch>=2.0
+# transformers 5.x ships breaking changes weekly. speechkit tries the v4 and
+# v5 class names in turn, but if phoneme recognition fails on import or on
+# loading the model, pin the last v4 release instead:
+#   pip install 'transformers<5'
+transformers>=4.35
+huggingface_hub>=0.19
+
+# Optional. Replaces the built-in English letter-to-sound guesser used for
+# word-boundary assignment in the alignment stage, and needs the espeak-ng
+# binary installed separately.
+# phonemizer>=3.2

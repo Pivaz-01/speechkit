@@ -1,0 +1,90 @@
+# GitHub reads this file and adds a "Cite this repository" button to the
+# sidebar of the repo page, which offers APA and BibTeX. Zenodo also reads it
+# when minting a DOI, so the author list on the DOI record comes from here.
+#
+# EDIT THE FOUR LINES MARKED "TODO" AND DELETE THIS COMMENT BLOCK.
+# The format is CFF 1.2.0; validate at https://citation-file-format.github.io
+# YAML is indentation-sensitive: two spaces, never tabs.
+
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: >-
+  speechkit: acoustic analysis, phoneme recognition and phoneme-to-text
+  alignment for speech recordings
+abstract: >-
+  An open-source tool that combines whole-recording acoustic measurement via
+  Praat, phoneme-level recognition with wav2vec2 and manual review, and
+  alignment of produced phonemes to the reference text of a reading passage,
+  behind a single local interface.
+type: software
+version: 1.0.0
+date-released: "2026-09-15"          # TODO: the date you tag the release
+license: GPL-3.0-or-later            # TODO: must match your LICENSE file
+repository-code: "https://github.com/YOUR-USERNAME/speechkit"
+url: "https://github.com/YOUR-USERNAME/speechkit"
+
+authors:
+  - given-names: Luca                # TODO: check spelling
+    family-names: YOUR-SURNAME       # TODO
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    # affiliation: Your Department, Your University
+
+# Add co-authors by repeating the block above. Order matters: it becomes the
+# author order in every citation generated from this file.
+
+keywords:
+  - speech analysis
+  - acoustic analysis
+  - phoneme recognition
+  - forced alignment
+  - dysarthria
+  - Praat
+  - wav2vec2
+
+# Uncomment once you have a Zenodo DOI (see the README). Use the CONCEPT DOI,
+# the one that always resolves to the newest release, not the version DOI.
+# identifiers:
+#   - type: doi
+#     value: 10.5281/zenodo.XXXXXXX
+#     description: Concept DOI for all versions
+
+# Software this tool depends on scientifically, and which should be cited
+# alongside it when you report results.
+references:
+  - type: software
+    title: "Praat: doing phonetics by computer"
+    authors:
+      - given-names: Paul
+        family-names: Boersma
+      - given-names: David
+        family-names: Weenink
+    url: "https://www.fon.hum.uva.nl/praat/"
+  - type: article
+    title: >-
+      Introducing Parselmouth: A Python interface to Praat
+    authors:
+      - given-names: Yannick
+        family-names: Jadoul
+      - given-names: Bill
+        family-names: Thompson
+      - given-names: Bart
+        family-names: de Boer
+    journal: Journal of Phonetics
+    volume: 71
+    start: 1
+    end: 15
+    year: 2018
+    doi: 10.1016/j.wocn.2018.07.001
+  - type: article
+    title: >-
+      Simple and Effective Zero-shot Cross-lingual Phoneme Recognition
+    authors:
+      - given-names: Qiantong
+        family-names: Xu
+      - given-names: Alexei
+        family-names: Baevski
+      - given-names: Michael
+        family-names: Auli
+    year: 2021
+    doi: 10.48550/arXiv.2109.11680
+    url: "https://arxiv.org/abs/2109.11680"

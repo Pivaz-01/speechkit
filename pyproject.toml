@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "speechkit"
+version = "1.0.0"
+description = "Acoustic analysis, phoneme recognition and phoneme-to-text alignment for speech recordings"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+# 3.10 is the floor because librosa needs numba, and numba 0.61 dropped
+# Python 3.9. The alignment stage alone would run on older versions.
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "numpy>=1.24,<3",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+acoustics = ["librosa>=0.10", "soundfile>=0.12", "matplotlib>=3.7", "praat-parselmouth>=0.4.3"]
+phonemes = ["torch>=2.0", "transformers>=4.35", "huggingface_hub>=0.19", "soundfile>=0.12"]
+espeak = ["phonemizer>=3.2"]
+all = ["speechkit[acoustics,phonemes]"]
+
+[project.scripts]
+speechkit = "speechkit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["speechkit*"]
+
+[tool.setuptools.package-data]
+"speechkit.web" = ["templates/*.html", "static/*"]

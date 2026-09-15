@@ -1,0 +1,950 @@
+/* ==========================================================================
+   speechkit — interface styling
+
+   This is a drop-in replacement for the previous stylesheet. Only appearance
+   changed: every selector the interface actually uses is still here, so
+   app.js, index.html and settings.py are untouched. The form is still
+   generated from schema(); there is no field list in here either.
+
+   The model is Apple's own settings vocabulary, because it fits what this
+   page is: a long list of parameters that has to be read, not admired.
+     - One scan line. Labels in a fixed left column, values in a fixed right
+       column, so 40 settings form one column of values the eye can run down.
+     - Grouped lists. Each group is a white card with hairline-separated rows.
+       Structure comes from spacing and hairlines, not from boxes and fills.
+     - Quiet colour. Each pipeline stage still owns one accent, and that
+       accent still marks the stage in the rail, its heading, its run button
+       and its results. It is now used as a tint behind the current stage
+       rather than as saturated text, so the page is readable on a projector.
+     - Adaptive appearance. Light by default, dark when the system asks.
+
+   Colour tokens are Apple's published system values (#0071e3 blue, #5856d6
+   indigo, #ff9500 orange, #1d1d1f ink) rather than invented near-blacks.
+   Each stage carries five tokens because one is not enough to stay legible:
+   a fill, a text colour for that fill, a text colour safe on white, a
+   background tint and a focus halo. Amber in particular cannot take white
+   text, so alignment sets --stage-on to ink instead.
+   ========================================================================== */
+
+/* Inter stands in for SF on Windows and Linux; Macs get the real thing from
+   -apple-system, which is listed first. If the font never loads — no network
+   at a conference — the chain falls back to Segoe UI, which is also fine. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  color-scheme: light dark;
+
+  /* surfaces */
+  --canvas: #f2f2f5;
+  --sidebar: rgba(247, 247, 249, 0.72);
+  --sidebar-solid: #f7f7f9;
+  --card: #ffffff;
+  --field: #ffffff;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-hover: rgba(120, 120, 128, 0.18);
+  --track: rgba(120, 120, 128, 0.28);
+
+  /* ink */
+  --ink: #1d1d1f;
+  --ink2: #424245;
+  --ink3: #86868b;
+
+  /* lines */
+  --sep: rgba(0, 0, 0, 0.08);
+  --sep-strong: rgba(0, 0, 0, 0.16);
+
+  /* semantic */
+  --ok: #1d8a4e;
+  --ok-tint: rgba(52, 199, 89, 0.14);
+  --danger: #d70015;
+  --danger-tint: rgba(255, 59, 48, 0.12);
+  --warn-ink: #9a5b00;
+
+  /* type */
+  --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI Variable Text',
+          'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, 'Cascadia Mono',
+          Consolas, monospace;
+
+  /* geometry — radii differ by role rather than being one value everywhere */
+  --r-card: 12px;
+  --r-ctl: 7px;
+  --r-row: 8px;
+  --r-pill: 980px;
+  --rail: 244px;
+  --col: 940px;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Stage tokens. The selector is deliberately generic: it matches both <body>,
+   which carries the current stage, and each .stage-btn, which carries its own.
+   That is what lets one rule paint every rail row in its own colour. */
+[data-stage="acoustics"] {
+  --stage: #0071e3;  --stage-on: #ffffff;  --stage-ink: #0062c4;
+  --stage-tint: rgba(0, 113, 227, 0.10);  --stage-halo: rgba(0, 113, 227, 0.25);
+}
+[data-stage="phonemes"] {
+  --stage: #5856d6;  --stage-on: #ffffff;  --stage-ink: #4d4bbf;
+  --stage-tint: rgba(88, 86, 214, 0.10);  --stage-halo: rgba(88, 86, 214, 0.25);
+}
+[data-stage="alignment"] {
+  --stage: #ff9500;  --stage-on: #1d1d1f;  --stage-ink: #9a5b00;
+  --stage-tint: rgba(255, 149, 0, 0.14);  --stage-halo: rgba(255, 149, 0, 0.30);
+}
+[data-stage="server"] {
+  --stage: #8e8e93;  --stage-on: #ffffff;  --stage-ink: #6e6e73;
+  --stage-tint: rgba(142, 142, 147, 0.14);  --stage-halo: rgba(142, 142, 147, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #000000;
+    --sidebar: rgba(28, 28, 30, 0.72);
+    --sidebar-solid: #1c1c1e;
+    --card: #1c1c1e;
+    --field: #2c2c2e;
+    --fill: rgba(120, 120, 128, 0.24);
+    --fill-hover: rgba(120, 120, 128, 0.36);
+    --track: rgba(120, 120, 128, 0.32);
+
+    --ink: #f5f5f7;
+    --ink2: #d1d1d6;
+    --ink3: #98989d;
+
+    --sep: rgba(255, 255, 255, 0.10);
+    --sep-strong: rgba(255, 255, 255, 0.22);
+
+    --ok: #30d158;
+    --ok-tint: rgba(48, 209, 88, 0.16);
+    --danger: #ff453a;
+    --danger-tint: rgba(255, 69, 58, 0.16);
+    --warn-ink: #ffb340;
+
+    --shadow-card: none;
+    --shadow-pop: 0 20px 48px rgba(0, 0, 0, 0.6);
+  }
+  [data-stage="acoustics"] {
+    --stage: #0a84ff;  --stage-ink: #4aa8ff;
+    --stage-tint: rgba(10, 132, 255, 0.20);  --stage-halo: rgba(10, 132, 255, 0.35);
+  }
+  [data-stage="phonemes"] {
+    --stage: #5e5ce6;  --stage-ink: #918fff;
+    --stage-tint: rgba(94, 92, 230, 0.24);  --stage-halo: rgba(94, 92, 230, 0.38);
+  }
+  [data-stage="alignment"] {
+    --stage: #ff9f0a;  --stage-ink: #ffb340;
+    --stage-tint: rgba(255, 159, 10, 0.20);  --stage-halo: rgba(255, 159, 10, 0.34);
+  }
+  [data-stage="server"] {
+    --stage: #98989d;  --stage-ink: #aeaeb2;
+    --stage-tint: rgba(152, 152, 157, 0.20);  --stage-halo: rgba(152, 152, 157, 0.32);
+  }
+}
+
+/* ------------------------------------------------------------------- base */
+
+* { box-sizing: border-box; }
+
+html { height: 100%; }
+
+/* The shell used to be sized with calc(100% - 53px), which only held while the
+   header stayed exactly 53px tall. A two-row grid is measured for us instead. */
+body {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+}
+
+a { color: var(--stage-ink); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+::selection { background: var(--stage-halo); }
+
+:where(h1, h2, h3, p) { margin: 0; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
+*::-webkit-scrollbar { width: 11px; height: 11px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--track);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-pill);
+}
+*::-webkit-scrollbar-thumb:hover { background-color: var(--sep-strong); background-clip: content-box; }
+
+/* ----------------------------------------------------------------- header */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  height: 52px;
+  border-bottom: 1px solid var(--sep);
+  background: var(--sidebar-solid);
+}
+
+.wordmark {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.wordmark span { color: var(--ink3); font-weight: 400; }
+
+.version {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+}
+
+.env { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink2);
+  cursor: default;
+  white-space: nowrap;
+}
+.chip[data-state="ok"]      { background: var(--ok-tint); color: var(--ok); }
+.chip[data-state="missing"] { background: var(--danger-tint); color: var(--danger); }
+
+/* ------------------------------------------------------------------ shell */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------------- rail */
+
+.rail {
+  border-right: 1px solid var(--sep);
+  background: var(--sidebar);
+  padding: 16px 0 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+@supports (backdrop-filter: blur(1px)) {
+  .rail { backdrop-filter: blur(24px) saturate(180%); }
+}
+
+.rail h2 {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink3);
+  margin: 0 0 6px 22px;
+}
+
+/* One rounded row per stage, inset from the sidebar edge. */
+.stage-btn {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: baseline;
+  gap: 8px;
+  width: calc(100% - 20px);
+  margin: 1px 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-row);
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.stage-btn:hover { background: var(--fill); }
+.stage-btn .num {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+}
+.stage-btn .sub {
+  grid-column: 2;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink3);
+}
+.stage-btn[aria-current="true"] {
+  background: var(--stage-tint);
+  color: var(--stage-ink);
+}
+.stage-btn[aria-current="true"] .num { color: var(--stage-ink); }
+.stage-btn[aria-current="true"] .sub { color: var(--stage-ink); opacity: 0.8; }
+.stage-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+/* The editor is a separate page, so it reads as a link out, not a stage. */
+.rail-link {
+  display: block;
+  margin: 0 10px 2px 34px;
+  padding: 5px 10px;
+  border-radius: var(--r-row);
+  color: var(--ink2);
+  font-size: 12.5px;
+}
+.rail-link:hover { background: var(--fill); color: var(--ink); text-decoration: none; }
+
+.rail-foot {
+  margin-top: auto;
+  padding: 14px 20px 16px;
+  border-top: 1px solid var(--sep);
+}
+.rail-foot h2 { margin-left: 0; }
+/* The preset row is laid out inline in index.html; these keep it inside the
+   sidebar instead of letting the select push the button out. */
+.rail-foot select { flex: 1 1 110px; width: auto; min-width: 0; max-width: none; }
+.rail-foot .path {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--ink3);
+  word-break: break-all;
+  margin-top: 10px;
+}
+
+/* ------------------------------------------------------------------- main */
+
+.main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Content is capped and centred: a settings row stretched across a 27-inch
+   monitor puts its label and its value too far apart to associate. */
+.panel { overflow-y: auto; padding: 0 0 48px; }
+.panel > * {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-block: 24px 18px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--sep);
+}
+.panel-head h1 {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+.panel-head .blurb {
+  max-width: 64ch;
+  color: var(--ink3);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.panel-tools {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: none;
+  padding-top: 3px;
+}
+.panel-tools .switch span { color: var(--ink2); font-size: 13px; }
+
+/* ------------------------------------------------------------- task picker
+   The acoustics panel opens on a choice rather than a form: the two tasks run
+   through different measurement code, and most window and token settings are
+   never read on a passage, so asking first and then showing 22 settings
+   instead of 40 is more honest than a dropdown labelled "auto". It is the
+   first thing on the page and the only place with any visual weight. */
+
+.taskpick {
+  padding-block: 22px 4px;
+}
+.taskpick h3 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin-bottom: 12px;
+}
+.taskopts { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.taskopt {
+  position: relative;
+  flex: 1 1 200px;
+  padding: 15px 46px 15px 16px;
+  border: 1px solid var(--sep-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+.taskopt strong { font-weight: 500; font-size: 14px; letter-spacing: -0.006em; }
+.taskopt:hover { border-color: var(--ink3); }
+
+/* The selection mark is drawn, not typed: a ring that fills and a tick. */
+.taskopt::before,
+.taskopt::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  box-sizing: border-box;
+}
+.taskopt::before {
+  right: 16px;
+  width: 19px;
+  height: 19px;
+  margin-top: -9.5px;
+  border: 1.5px solid var(--sep-strong);
+  border-radius: 50%;
+}
+.taskopt::after {
+  right: 21.5px;
+  width: 8px;
+  height: 4px;
+  margin-top: -3.5px;
+  border-left: 1.7px solid var(--stage-on);
+  border-bottom: 1.7px solid var(--stage-on);
+  transform: rotate(-45deg);
+  opacity: 0;
+}
+.taskopt[aria-pressed="true"] {
+  border-color: var(--stage);
+  box-shadow: inset 0 0 0 1px var(--stage);
+}
+.taskopt[aria-pressed="true"]::before {
+  background: var(--stage);
+  border-color: var(--stage);
+}
+.taskopt[aria-pressed="true"]::after { opacity: 1; }
+
+.taskhelp {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--ink3);
+  max-width: 74ch;
+}
+
+.linkish {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--stage-ink);
+  cursor: pointer;
+}
+.linkish:hover { text-decoration: underline; }
+
+/* ------------------------------------------------------------------ group */
+
+.group {
+  border: 1px solid var(--sep);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  margin-top: 18px;
+  overflow: hidden;
+}
+/* Groups are cards, so the page padding has to stop at the card edge. */
+.panel > .group { max-width: calc(var(--col) - 64px); padding-inline: 0; }
+
+.group > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  list-style: none;
+}
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary:hover { background: var(--fill); }
+.group > summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  margin-top: -3px;
+  border-right: 1.6px solid var(--ink3);
+  border-bottom: 1.6px solid var(--ink3);
+  transform: rotate(-45deg);
+  transition: transform 0.18s ease;
+}
+.group[open] > summary::after { transform: rotate(45deg); margin-top: 2px; }
+.group .fields { padding: 0 18px 4px; }
+
+/* ------------------------------------------------------------------ field
+   Label left, value right, hairline between rows. The value column starts at
+   the same x in every row and in every group, which is what makes a page of
+   40 parameters scannable. */
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+  gap: 2px 24px;
+  padding: 11px 0;
+  border-top: 1px solid var(--sep);
+  align-items: start;
+}
+.field:first-child { border-top: 0; }
+.field.hidden { display: none; }
+
+.field > .label { padding-top: 5px; }
+.field > .control { min-width: 0; }
+.field .label label { font-size: 13.5px; display: block; color: var(--ink); }
+.field .varname {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink3);
+  margin-top: 2px;
+  display: block;
+}
+.field .help {
+  grid-column: 1 / -1;
+  font-size: 12.5px;
+  color: var(--ink3);
+  max-width: 76ch;
+  margin-top: 4px;
+}
+
+/* A revealed setting that belongs to the other task, so nobody tunes a value
+   the analysis will not read. */
+.field.offtask { opacity: 0.55; }
+.field.offtask:focus-within, .field.offtask:hover { opacity: 1; }
+.tasktag {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink2);
+}
+
+/* --------------------------------------------------------------- controls */
+
+input[type=text], input[type=number], select, textarea {
+  width: 100%;
+  max-width: 100%;
+  background: var(--field);
+  border: 1px solid var(--sep-strong);
+  border-radius: var(--r-ctl);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 6px 10px;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+input[type=text], textarea { font-family: var(--mono); font-size: 12.5px; }
+input[type=number] {
+  max-width: 132px;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+select { max-width: 380px; padding-right: 30px; cursor: pointer; }
+textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+input::placeholder, textarea::placeholder { color: var(--ink3); }
+
+/* Native select arrows are the one control that gives the platform away. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+}
+
+input:hover, select:hover, textarea:hover { border-color: var(--ink3); }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--stage);
+  box-shadow: 0 0 0 3.5px var(--stage-halo);
+}
+input.bad, textarea.bad {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3.5px var(--danger-tint);
+}
+
+button:focus-visible, summary:focus-visible, a:focus-visible, .taskopt:focus-visible {
+  outline: 2px solid var(--stage);
+  outline-offset: 2px;
+  border-radius: var(--r-ctl);
+}
+
+/* A checkbox is not a switch; this is. Pure CSS on the existing markup. */
+.switch { display: flex; align-items: center; gap: 9px; padding-top: 3px; }
+.switch input[type=checkbox] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  margin: 0;
+  width: 40px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.switch input[type=checkbox]::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s cubic-bezier(0.32, 0.82, 0.32, 1);
+}
+.switch input[type=checkbox]:checked { background: var(--stage); }
+.switch input[type=checkbox]:checked::after { transform: translateX(16px); }
+.switch input[type=checkbox]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3.5px var(--stage-halo);
+}
+.switch span { font-size: 12.5px; color: var(--ink3); }
+
+/* ------------------------------------------------------------- path lists */
+
+.pathlist { display: flex; flex-direction: column; gap: 6px; }
+.pathrow { display: flex; gap: 6px; align-items: center; }
+.pathrow input { flex: 1; min-width: 0; }
+.pathlist .meta {
+  font-size: 12px;
+  color: var(--ink3);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+.pathlist .meta.warn { color: var(--warn-ink); }
+
+.inputwrap { display: flex; gap: 6px; align-items: center; }
+.inputwrap input { flex: 1; min-width: 0; }
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.004em;
+  padding: 6px 13px;
+  border-radius: var(--r-ctl);
+  border: 1px solid var(--sep-strong);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.btn:hover { background: var(--fill); }
+.btn:active { background: var(--fill-hover); }
+.btn.primary {
+  background: var(--stage);
+  border-color: transparent;
+  color: var(--stage-on);
+  font-weight: 500;
+  padding: 7px 18px;
+}
+.btn.primary:hover { filter: brightness(1.06); background: var(--stage); }
+.btn.primary:active { filter: brightness(0.94); }
+.btn.quiet {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ink3);
+}
+.btn.quiet:hover { background: var(--fill); color: var(--ink); }
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { background: var(--danger-tint); border-color: var(--danger); }
+.btn[disabled] { opacity: 0.38; cursor: not-allowed; filter: none; }
+.btn[disabled]:hover { background: var(--card); }
+.btn.quiet[disabled]:hover { background: none; }
+.btn.small { padding: 5px 10px; font-size: 12.5px; }
+
+/* -------------------------------------------------------------- run strip */
+
+.runbar {
+  border-top: 1px solid var(--sep);
+  background: var(--sidebar);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .runbar { backdrop-filter: blur(24px) saturate(180%); }
+}
+.runbar .row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 32px;
+  max-width: var(--col);
+  margin-inline: auto;
+}
+.runbar .state {
+  font-size: 12.5px;
+  color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+  padding-left: 4px;
+}
+.runbar .state[data-state="running"] { color: var(--stage-ink); }
+.runbar .state[data-state="failed"] { color: var(--danger); }
+.runbar .state[data-state="done"] { color: var(--ok); }
+.runbar .spacer { margin-left: auto; }
+
+.log {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--card);
+  border-top: 1px solid var(--sep);
+  padding: 0 32px;
+  margin: 0;
+  max-height: 0;
+  overflow-y: auto;
+  transition: max-height 0.26s ease, padding 0.26s ease;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink2);
+}
+.log.open { max-height: 34vh; padding: 14px 32px; }
+.log .err { color: var(--danger); }
+.log .hi { color: var(--stage-ink); }
+
+/* --------------------------------------------------------------- results */
+
+.results { margin-top: 26px; }
+.results h3 {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  margin-bottom: 10px;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+table.data th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink3);
+  border-bottom: 1px solid var(--sep-strong);
+  padding: 7px 14px 7px 0;
+  white-space: nowrap;
+}
+table.data td {
+  padding: 7px 14px 7px 0;
+  border-bottom: 1px solid var(--sep);
+  font-family: var(--mono);
+  color: var(--ink2);
+}
+table.data td:first-child { color: var(--ink); }
+table.data th.num, table.data td.num { text-align: right; padding-right: 22px; }
+
+.filelist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.filelist a {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink2);
+}
+.filelist a:hover {
+  background: var(--stage-tint);
+  color: var(--stage-ink);
+  text-decoration: none;
+}
+.filelist .meta { font-size: 12.5px; color: var(--ink3); }
+
+/* ----------------------------------------------------------------- picker */
+
+dialog.picker {
+  position: fixed;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  width: min(720px, 92vw);
+  padding: 0;
+  box-shadow: var(--shadow-pop);
+}
+dialog.picker::backdrop { background: rgba(0, 0, 0, 0.26); }
+@supports (backdrop-filter: blur(1px)) {
+  dialog.picker::backdrop { backdrop-filter: blur(3px); }
+}
+dialog.picker header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--sep);
+}
+dialog.picker header strong { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+dialog.picker header input { flex: 1; min-width: 0; font-size: 12px; }
+dialog.picker .listing {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+dialog.picker .entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: var(--r-row);
+  background: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+dialog.picker .entry:hover { background: var(--fill); }
+/* The name takes the free space, so the size and the chevron end up flush
+   right whether or not a row has a count. */
+dialog.picker .entry > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+dialog.picker .entry .count {
+  margin-left: 0;
+  color: var(--ink3);
+  font-size: 11px;
+  flex: none;
+}
+/* Folders drill in, files are picked — so only folders get the chevron. */
+dialog.picker .entry.dir::after {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-left: 2px;
+  border-right: 1.5px solid var(--ink3);
+  border-top: 1.5px solid var(--ink3);
+  transform: rotate(45deg);
+}
+dialog.picker .entry.file { color: var(--ink3); }
+dialog.picker .entry.file.audio { color: var(--ink); }
+dialog.picker footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 13px 16px;
+  border-top: 1px solid var(--sep);
+}
+dialog.picker footer .hint { font-size: 12.5px; color: var(--ink3); margin-right: auto; }
+
+/* ------------------------------------------------------------------ toast */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(10px) scale(0.98);
+  background: var(--card);
+  border: 1px solid var(--sep);
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 13px;
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.32, 0.82, 0.32, 1);
+  max-width: min(560px, 90vw);
+  box-shadow: var(--shadow-pop);
+  z-index: 40;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+.toast.bad { border-color: var(--danger); color: var(--danger); }
+
+/* ------------------------------------------------------------- narrow view */
+
+@media (max-width: 1000px) {
+  .shell { grid-template-columns: 1fr; }
+  body { height: auto; min-height: 100%; }
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--sep);
+    padding: 12px 0 10px;
+  }
+  .rail h2 { margin-left: 16px; }
+  .rail > div:first-of-type {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 0 12px 2px;
+  }
+  .stage-btn {
+    width: auto;
+    margin: 0;
+    flex: none;
+    grid-template-columns: auto auto;
+    align-items: center;
+  }
+  .stage-btn .sub { display: none; }
+  .rail-link { margin: 0; flex: none; white-space: nowrap; align-self: center; }
+  .rail-foot { margin-top: 12px; padding-bottom: 12px; }
+  .rail-foot .path { display: none; }
+  .panel > *, .runbar .row { padding-inline: 20px; }
+  .panel > .group { max-width: calc(100% - 40px); }
+  .log, .log.open { padding-inline: 20px; }
+}
+
+@media (max-width: 720px) {
+  .field { grid-template-columns: 1fr; gap: 6px; }
+  .field > .label { padding-top: 0; }
+  .panel-head { flex-wrap: wrap; }
+  .panel-tools { margin-left: 0; }
+}
+
+/* ------------------------------------------------------- motion and access */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .btn, .taskopt, .group, dialog.picker { border: 1px solid ButtonBorder; }
+  .stage-btn[aria-current="true"] { background: Highlight; color: HighlightText; }
+  input:focus, select:focus, textarea:focus,
+  .switch input[type=checkbox]:focus-visible { outline: 2px solid Highlight; }
+}

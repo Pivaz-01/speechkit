@@ -1,0 +1,39 @@
+# Line endings, decided by the repository instead of by whoever cloned it.
+* text=auto
+
+# Batch files are read by cmd.exe, which wants CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts must keep LF: CRLF breaks the shebang line.
+*.sh text eol=lf
+
+# Source and data files that should be normalised.
+*.py    text
+*.js    text
+*.css   text
+*.html  text
+*.md    text
+*.txt   text
+*.toml  text
+*.yml   text
+*.cff   text
+
+# Binary: never touch these, never diff them as text.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.wav   binary
+*.flac  binary
+*.mp3   binary
+
+# If a session file is ever force-added as sample data, do not mangle it.
+*.tsv       -text
+*.TextGrid  -text
+
+# Keep the vendored changelog out of language stats and collapsed in diffs.
+CHANGELOG.md linguist-generated=true

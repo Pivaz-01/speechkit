@@ -1,0 +1,26 @@
+# conda env create -f environment.yml && conda activate speechkit
+#
+# Python is pinned to 3.11 on purpose. The working range is 3.10 to 3.13; the
+# ceiling is set by librosa, which depends on numba and llvmlite, and those are
+# the slowest packages in this stack to support a new CPython. 3.11 and 3.12
+# have had wheels for everything for a long time. Do not raise this to 3.14
+# before checking that librosa, numba and torch all have wheels for it.
+name: speechkit
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - numpy>=1.24
+  - scipy>=1.10
+  - matplotlib>=3.7
+  - librosa>=0.10
+  - libsndfile
+  - pysoundfile>=0.12
+  - flask>=3.0
+  - pip:
+      - praat-parselmouth>=0.4.3
+      - torch>=2.0
+      - transformers>=4.35
+      - huggingface_hub>=0.19
+      # - phonemizer>=3.2

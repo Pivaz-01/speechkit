@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>speechkit</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}"/>
+</head>
+<body data-stage="acoustics">
+
+<div class="topbar">
+  <h1 class="wordmark">speech<span>kit</span></h1>
+  <span class="version">v{{ version }}</span>
+  <div class="env" id="env"></div>
+</div>
+
+<div class="shell">
+
+  <nav class="rail">
+    <h2>Pipeline</h2>
+    <div id="stages"></div>
+    <div class="rail-foot">
+      <h2>Saved settings</h2>
+      <div id="presets" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></div>
+      <div class="path" id="settingsPath"></div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="panel" id="panel"></div>
+    <div class="runbar">
+      <div class="row" id="runRow"></div>
+      <pre class="log" id="log" aria-live="polite" aria-label="Analysis log"></pre>
+    </div>
+  </div>
+
+</div>
+
+<dialog class="picker" id="picker">
+  <header>
+    <strong id="pickerMode">Choose a folder</strong>
+    <input type="text" id="pickerPath" spellcheck="false" aria-label="Current path"/>
+  </header>
+  <div class="listing" id="pickerList"></div>
+  <footer>
+    <span class="hint">Click a folder to open it. Click a file to select it.</span>
+    <button class="btn" type="button" id="pickCancel">Cancel</button>
+    <button class="btn primary" type="button" id="pickUse">Use this folder</button>
+  </footer>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
