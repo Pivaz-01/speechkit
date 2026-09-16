@@ -1,0 +1,35 @@
+{
+  "subject_id": "input",
+  "source": "calibrated",
+  "pitch_range": [
+    77.2,
+    223.0
+  ],
+  "median_hz": 131.1930864295426,
+  "spread_st": 0.0,
+  "n_files_probed": 1,
+  "n_files_used": 1,
+  "verdicts": {
+    "ok": 1
+  },
+  "confidence": "check",
+  "warnings": [
+    "only 1 file(s) reached the voicing floor of 0.30; the range rests on weak evidence"
+  ],
+  "notes": [],
+  "report": "subject input: F0 131.2 Hz over 1 of 1 file(s), spread 0.0 st\n  -> pitch_range = (77, 223) Hz  [median / 1.7 .. median * 1.7]\n  comb verdicts: ok=1\n  ! only 1 file(s) reached the voicing floor of 0.30; the range rests on weak evidence",
+  "calibrated_on": "2026-09-16 12:17",
+  "on_ambiguous": "as_measured",
+  "margin": 1.7,
+  "per_file": [
+    {
+      "file": "P:\\projects\\human\\VOP STIM\\DBS_stroke_clinicalstudy\\Analysis\\Luca\\GITHUB_SfN\\demo\\sust_phonation\\input\\speaker01_sust.wav",
+      "median_hz": 131.1930864295426,
+      "corrected_hz": 131.1930864295426,
+      "voiced_fraction": 0.930672268907563,
+      "verdict": "ok",
+      "score_ref_db": -2.1384059742538177,
+      "score_half_db": -34.218197482985396
+    }
+  ]
+}

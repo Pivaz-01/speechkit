@@ -4,7 +4,7 @@ Every setting, in one place.
 In the original scripts the tunable values were upper-case constants edited in
 the source: a `CONFIG` block at the top of `phonemes_alignment.py`, a handful of
 constants at the top of `phonemes_from_audio.py`, and a long `__main__` block at
-the foot of `praat_v10.py`. They are all listed here instead, each with a type,
+the foot of `acoutstics.py`. They are all listed here instead, each with a type,
 a default and the explanation that used to be a comment beside it.
 
 The interface is generated from this list, so exposing a new setting means
@@ -57,7 +57,7 @@ class Setting:
 
 
 # =============================================================================
-# ACOUSTIC ANALYSIS  (was the __main__ block of praat_v10.py)
+# ACOUSTIC ANALYSIS  (was the __main__ block of acoustics.py)
 # =============================================================================
 
 _ACOUSTICS: tuple[Setting, ...] = (
@@ -71,9 +71,9 @@ _ACOUSTICS: tuple[Setting, ...] = (
     Setting("OUTPUT_FOLDER", "Output folder", "dir", "",
             "acoustics", "Input and output",
             "Where the CSV files and plots are written. Created if missing."),
-    Setting("OUTPUT_PREFIX", "Output file prefix", "text", "praat",
+    Setting("OUTPUT_PREFIX", "Output file prefix", "text", "speechkit",
             "acoustics", "Input and output",
-            "Every output file starts with this, e.g. praat_consolidated.csv."),
+            "Every output file starts with this, e.g. speechkit_consolidated.csv."),
     Setting("TASK", "What is in these recordings?", "task", "",
             "acoustics", "Recording type",
             "The two tasks are measured differently and have different settings, so "

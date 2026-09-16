@@ -1,0 +1,104 @@
+metric,direction,guidance,other 99999999 n=1
+duration_total_s,neutral,recording length; context only,20.0152
+duration_speech_s,neutral,detected speech length; context only,17.891
+articulation_time_s,neutral,speaking time excluding pauses; context only,16.7764
+phonation_time_s,neutral,voiced time; context only,17.891
+intensity_active_mean_db,neutral,UNCALIBRATED active level; within-setup only,43.9833
+intensity_active_std_db,around,lower = steadier loudness; some variation is normal,1.63182
+intensity_nucleus_std_db,lower,lower = better intensity CONTROL on stressed vowels,1.5403
+intensity_range_db,around,moderate range is normal; extreme values atypical,26.033
+intensity_decay_db,around,near 0 = steady loudness; strongly negative = hypokinetic loudness DECAY across passage,-2.45305
+pitch_mean_hz,neutral,speaker characteristic (sex/age); not better/worse,131.052
+pitch_median_hz,neutral,speaker characteristic; not better/worse,131.174
+pitch_std_hz,around,some F0 variation = natural prosody; near-zero = monotone,1.59744
+pitch_min_hz,neutral,context only,127.272
+pitch_max_hz,neutral,context only,144.669
+pitch_range_hz,around,moderate range healthy; very small = monotone,17.3969
+pitch_range_semitones,around,moderate semitone range = expressive,2.21808
+pitch_cv,around,natural read-speech F0 CV is moderate; very low = monotone,0.012178
+voiced_percent,higher,more voicing = more continuous phonation (within reason),92.9891
+unvoiced_percent,lower,less unvoiced = more continuous phonation,7.01087
+cpps_db,higher,"higher CPPS = clearer, less dysphonic voice (robust severity correlate)",19.8127
+cpps_iqr_db,lower,window-to-window IQR of CPPS; lower = more repeatable estimate,0.997959
+cpp_db,higher,"higher CPP = clearer, less breathy voice",18.7002
+hnr_db,higher,"higher = clearer, less noisy voice",22.366
+hnr_iqr_db,lower,window-to-window IQR of HNR; lower = more repeatable estimate,1.11425
+hnr_median_perinterval_db,higher,higher = clearer voice (robust median complement to HNR),19.4708
+nhr,lower,lower noise-to-harmonics = clearer voice,0.00580139
+mean_autocorrelation,higher,higher = more periodic/clean phonation,0.992563
+voice_breaks_count,lower,fewer genuine phonation breaks = steadier voice,0
+voice_breaks_degree_percent,lower,less time in breaks = steadier voice,0
+jitter_local_percent,lower,lower = more stable pitch periods,0.359958
+jitter_ppq5_percent,lower,lower = more stable pitch periods,0.214263
+jitter_iqr,lower,"window-to-window IQR of jitter; if it approaches the jitter value, the median is not usable",0.0647313
+shimmer_local_db,lower,lower = more stable amplitude,0.20046
+shimmer_apq11_percent,lower,lower = more stable amplitude,1.75875
+shimmer_iqr,lower,"window-to-window IQR of shimmer; if it approaches the shimmer value, the median is not usable",0.343349
+num_pulses,neutral,depends on voiced duration; sanity-check only,17512
+spectral_centroid_hz,neutral,timbre/brightness; speaker & content dependent,1558.59
+spectral_spread_hz,neutral,spectral width; context only,2941.39
+spectral_skewness,neutral,spectral shape; context only,3.82783
+spectral_kurtosis,neutral,spectral shape; context only,16.509
+spectral_tilt_db_per_khz,neutral,vocal effort/phonation type; within-subject,-5.7442
+alpha_ratio_db,neutral,vocal effort/brightness; within-subject,-23.8935
+hammarberg_index,neutral,vocal effort; within-subject,26.024
+f1_mean_hz,neutral,vowel/speaker dependent; not better/worse,708.233
+f1_std_hz,lower,lower = more stable articulation,27.6795
+f2_mean_hz,neutral,vowel/speaker dependent; not better/worse,1372.64
+f2_std_hz,lower,lower = more stable articulation,45.0214
+f3_mean_hz,neutral,speaker dependent; not better/worse,3128.49
+f3_std_hz,lower,lower = more stable articulation,119.438
+voiced_fraction,higher,"fraction of frames the tracker calls voiced; always computable, so it still separates files when jitter/shimmer cannot be measured",0.929891
+f0_subharmonic_lock,lower,1 = a free tracker falls to F0/2 on this file: period doubling / diplophonia present,0
+f0_lock_semitones,lower,"in-range F0 minus unconstrained F0, in semitones; ~12 = full octave lock, ~0 = clean periodicity",-0.00168702
+pause_count,neutral,"breath gaps BETWEEN tokens = trial count - 1; structural, not a fluency measure",1
+pauses_per_minute,neutral,"breath-gap rate; depends on how many trials were recorded, not on the voice",3.35365
+pause_total_duration_s,neutral,"total inter-trial silence; recording protocol, not a fluency measure",1.11456
+pause_mean_duration_s,neutral,mean inter-trial breath pause; context only,1.11456
+pause_ratio_to_speech,neutral,inter-trial silence relative to phonation; context only,0.066436
+rec_quality_score,higher,"higher = better recording (about the signal, not the voice)",99.9977
+rec_snr_db,higher,higher SNR = cleaner recording,27.118
+rec_clipping_fraction,lower,lower = less clipping = cleaner recording,1.13292e-06
+speech_rate_syll_per_s,around,typical read speech mid range; much slower may indicate impairment,
+articulation_rate_syll_per_s,around,typical mid range; very slow may indicate impairment,
+syllable_count_used,neutral,syllables used for rate (exact if known passage),
+speaking_time_fraction,higher,1.0 = no pauses; lower = more total time lost to PAUSING,
+filler_count,lower,fewer fillers = more fluent,
+fillers_per_minute,lower,fewer fillers/min = more fluent,
+filler_total_duration_s,lower,less filler time = more fluent,
+filler_ratio_to_speech,lower,less filler relative to speech = more fluent,
+ems_3_8hz_ratio,higher,stronger syllabic (3-8 Hz) envelope modulation = better rhythm/intelligibility; reduced in dysarthria,
+ems_peak_freq_hz,around,syllabic peak typically ~4-5 Hz; far from this is atypical,
+ems_syllabic_to_slow_ratio,higher,more syllabic vs slow modulation energy = crisper rhythm,
+npvi,around,onset-interval PVI proxy; mid range for English read speech (within-subject),
+vowel_space_area,higher,larger vowel space = clearer articulation (reduced in dysarthria),
+vowel_dispersion_logarea,higher,larger F1-F2 cloud = more articulatory expansion; SHRINKS with hypokinetic centralization,
+vowel_cloud_spread_hz,lower,on a single sustained vowel a SMALLER F1-F2 cloud means steadier articulation,
+fluency_intensity_stability,higher,higher = steadier loudness control (indicative),
+fluency_pitch_stability,higher,higher = healthier prosody (indicative),
+fluency_rhythm_regularity,higher,higher = more typical rhythm (indicative),
+fluency_voice_quality,higher,higher = cleaner voice (indicative),
+fluency_articulation,higher,higher = more typical rate (indicative),
+fluency_overall,higher,"higher = more fluent overall (INDICATIVE only, not validated)",
+sv_mpt_longest_s,higher,maximum phonation time: longer = better respiratory/phonatory support,17.891
+sv_mpt_longest_uninterrupted_s,higher,"longest stretch of CONTINUOUS PHONATION inside a single token, with no break (>=50 ms below the phonation threshold or unvoiced) in the middle. Cannot exceed sv_mpt_longest_s; the gap between the two is how much of the best token was actually held. Read it with sv_n_breaks_in_best_token and sv_unbroken_energy_only_s in the audit block.",16.6122
+sv_mpt_mean_s,higher,mean token duration; longer = better sustained support,17.891
+sv_total_phonation_s,neutral,total phonated time in the file; context only,17.891
+sv_n_tokens,neutral,number of separate /a/ productions found in the file,1
+sv_f0_sd_semitones,lower,lower = steadier pitch on sustained phonation (typ. < 0.5 st),0.124918
+sv_f0_drift_st_per_s,around,near 0 = no drift; large magnitude = failing pitch control across the token,0.0235015
+sv_intensity_sd_db,lower,lower = steadier loudness within the window,0.633665
+sv_tremor_rate_hz,neutral,dominant 2-12 Hz F0 modulation rate; ~4-7 Hz typical of vocal tremor,3.49773
+sv_tremor_extent_st,lower,lower = less frequency tremor; large extent is a tremor sign,0.311006
+sv_cpps_token_db,higher,"CPPS over the whole token - computable even when the voice is too aperiodic for jitter/shimmer, so use it when they are blank",18.7002
+sv_hnr_token_db,higher,per-interval median HNR over the whole token; same role as above,19.4708
+sv_window_yield,higher,steady 2-3 s windows found / windows that would fit; low = the voice cannot hold a steady state,1
+sv_intensity_decay_db_per_s,higher,"loudness fade across the longest token in dB PER SECOND (negative = fading). Unlike intensity_decay_db this does not scale with take length, so it is the one to compare when phonation duration varies between sessions.",-0.147765
+sv_analyzed_fraction,higher,"seconds measured / seconds phonated. 1.0 = the whole vowel is behind the medians; 0.4 = 60% was discarded. Read it WITH sv_discard_interior_s: losing time at the onset and offset of a long take is normal, losing it in the middle is not. Also capped by geometry - about 0.8-0.95 is the best a clean take can reach, since the edge trim and the last part-window are always dropped",0.894306
+sv_window_yield_s,higher,"seconds measured / seconds the tiling COULD measure. The duration-weighted twin of sv_window_yield with the geometry divided out, so 1.0 means nothing was lost to the voice and a low value is a real steadiness finding rather than a short take",1
+sv_steady_frame_fraction,higher,"fraction of phonated frames on which a valid analysis window could be CENTRED, computed frame by frame with no window grid. Unaffected by take length, and defined even when no window survived, so this is the column that separates 'the voice never held still' from 'the take was too short for the usability gate'. Jitter, tremor and slow drift do NOT lower it - they are measured elsewhere",0.884239
+sv_longest_steady_run_s,higher,longest uninterrupted steady stretch in seconds. 80% steady frames in one block and 80% scattered over ten islands are different findings and only this column separates them; it is also the honest upper bound on how long a window you could place,15.8063
+sv_f1f2_cloud_spread_hz,lower,same as above in Hz: lower = steadier vowel,34.7
+sv_jitter_sd_across_tokens,lower,lower = more reproducible across repetitions of the same task,
+sv_shimmer_sd_across_tokens,lower,lower = more reproducible across repetitions,
+sv_hnr_sd_across_tokens,lower,lower = more reproducible across repetitions,

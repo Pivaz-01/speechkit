@@ -1,0 +1,35 @@
+{
+  "subject_id": "input",
+  "source": "calibrated",
+  "pitch_range": [
+    109.7,
+    317.1
+  ],
+  "median_hz": 186.50620031610558,
+  "spread_st": 0.0,
+  "n_files_probed": 1,
+  "n_files_used": 1,
+  "verdicts": {
+    "ok": 1
+  },
+  "confidence": "check",
+  "warnings": [
+    "only 1 file(s) reached the voicing floor of 0.30; the range rests on weak evidence"
+  ],
+  "notes": [],
+  "report": "subject input: F0 186.5 Hz over 1 of 1 file(s), spread 0.0 st\n  -> pitch_range = (110, 317) Hz  [median / 1.7 .. median * 1.7]\n  comb verdicts: ok=1\n  ! only 1 file(s) reached the voicing floor of 0.30; the range rests on weak evidence",
+  "calibrated_on": "2026-09-15 15:49",
+  "on_ambiguous": "as_measured",
+  "margin": 1.7,
+  "per_file": [
+    {
+      "file": "P:\\projects\\human\\VOP STIM\\DBS_stroke_clinicalstudy\\Analysis\\Luca\\GITHUB_SfN\\demo\\input\\speaker01_caterpillar.wav",
+      "median_hz": 186.50620031610558,
+      "corrected_hz": 186.50620031610558,
+      "voiced_fraction": 0.5506715506715507,
+      "verdict": "ok",
+      "score_ref_db": 0.9046706500619219,
+      "score_half_db": -2.186681247080555
+    }
+  ]
+}

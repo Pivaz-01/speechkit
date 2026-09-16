@@ -1,0 +1,190 @@
+metric,direction,guidance,speaker01_caterpillar
+task,neutral,analysis task used for this file,reading
+task_source,neutral,how the task was decided,forced
+octave_verdict,neutral,harmonic-comb octave check: ok | ambiguous | tracker_halved | tracker_doubled | inconclusive,ok
+octave_note,neutral,why the octave check decided that,comb consistent with 186 Hz (odd/even +1.4 dB)
+snr_reference,neutral,where the noise floor came from (none | leading_trailing | internal_below_threshold),leading_trailing
+sv_boundaries_source,neutral,token boundaries: inferred | file,inferred
+sv_window_rejections,neutral,why analysis windows were discarded,
+sv_coverage_note,neutral,v18: how much of the phonation was analysed and where the rest went,
+sv_usable_reasons,neutral,blank = usable; otherwise why this file should not enter group statistics,
+sv_token_spans_s,neutral,token boundaries actually used (s),
+rec_warnings,neutral,recording-quality warnings,
+### METRICS (103) - measurements of the voice,,,
+duration_total_s,neutral,recording length; context only,64.0385
+duration_speech_s,neutral,detected speech length; context only,61.498
+articulation_time_s,neutral,speaking time excluding pauses; context only,51.9198
+phonation_time_s,neutral,voiced time; context only,30.9439
+intensity_active_mean_db,neutral,UNCALIBRATED active level; within-setup only,49.0807
+intensity_active_std_db,around,lower = steadier loudness; some variation is normal,7.37558
+intensity_nucleus_std_db,lower,lower = better intensity CONTROL on stressed vowels,4.40846
+intensity_range_db,around,moderate range is normal; extreme values atypical,49.6294
+intensity_decay_db,around,near 0 = steady loudness; strongly negative = hypokinetic loudness DECAY across passage,-0.0811617
+pitch_mean_hz,neutral,speaker characteristic (sex/age); not better/worse,190.654
+pitch_median_hz,neutral,speaker characteristic; not better/worse,185.955
+pitch_std_hz,around,some F0 variation = natural prosody; near-zero = monotone,23.6655
+pitch_min_hz,neutral,context only,123.556
+pitch_max_hz,neutral,context only,266.696
+pitch_range_hz,around,moderate range healthy; very small = monotone,143.14
+pitch_range_semitones,around,moderate semitone range = expressive,13.3204
+pitch_cv,around,natural read-speech F0 CV is moderate; very low = monotone,0.124128
+voiced_percent,higher,more voicing = more continuous phonation (within reason),50.3168
+unvoiced_percent,lower,less unvoiced = more continuous phonation,49.6832
+cpps_db,higher,"higher CPPS = clearer, less dysphonic voice (robust severity correlate)",11.2686
+cpps_iqr_db,lower,window-to-window IQR of CPPS; lower = more repeatable estimate,
+cpp_db,higher,"higher CPP = clearer, less breathy voice",8.0928
+hnr_db,higher,"higher = clearer, less noisy voice",14.36
+hnr_iqr_db,lower,window-to-window IQR of HNR; lower = more repeatable estimate,
+hnr_median_perinterval_db,higher,higher = clearer voice (robust median complement to HNR),9.56903
+nhr,lower,lower noise-to-harmonics = clearer voice,0.0366438
+mean_autocorrelation,higher,higher = more periodic/clean phonation,0.917273
+voice_breaks_count,lower,fewer genuine phonation breaks = steadier voice,47
+voice_breaks_degree_percent,lower,less time in breaks = steadier voice,9.6738
+jitter_local_percent,lower,lower = more stable pitch periods,1.65757
+jitter_ppq5_percent,lower,lower = more stable pitch periods,0.889515
+jitter_iqr,lower,"window-to-window IQR of jitter; if it approaches the jitter value, the median is not usable",
+shimmer_local_db,lower,lower = more stable amplitude,0.728595
+shimmer_apq11_percent,lower,lower = more stable amplitude,6.46202
+shimmer_iqr,lower,"window-to-window IQR of shimmer; if it approaches the shimmer value, the median is not usable",
+num_pulses,neutral,depends on voiced duration; sanity-check only,6073
+spectral_centroid_hz,neutral,timbre/brightness; speaker & content dependent,2833.77
+spectral_spread_hz,neutral,spectral width; context only,3338.56
+spectral_skewness,neutral,spectral shape; context only,2.67262
+spectral_kurtosis,neutral,spectral shape; context only,10.2845
+spectral_tilt_db_per_khz,neutral,vocal effort/phonation type; within-subject,-6.10352
+alpha_ratio_db,neutral,vocal effort/brightness; within-subject,-19.5921
+hammarberg_index,neutral,vocal effort; within-subject,18.8923
+f1_mean_hz,neutral,vowel/speaker dependent; not better/worse,574.504
+f1_std_hz,lower,lower = more stable articulation,213.007
+f2_mean_hz,neutral,vowel/speaker dependent; not better/worse,1669.2
+f2_std_hz,lower,lower = more stable articulation,442.609
+f3_mean_hz,neutral,speaker dependent; not better/worse,2723.47
+f3_std_hz,lower,lower = more stable articulation,365.683
+voiced_fraction,higher,"fraction of frames the tracker calls voiced; always computable, so it still separates files when jitter/shimmer cannot be measured",0.503168
+f0_subharmonic_lock,lower,1 = a free tracker falls to F0/2 on this file: period doubling / diplophonia present,0
+f0_lock_semitones,lower,"in-range F0 minus unconstrained F0, in semitones; ~12 = full octave lock, ~0 = clean periodicity",-0.00982665
+pause_count,lower,fewer pauses = more fluent,24
+pauses_per_minute,lower,fewer pauses/min = more fluent,23.4154
+pause_total_duration_s,lower,less total pause time = more fluent,9.57823
+pause_mean_duration_s,lower,shorter pauses = more fluent,0.399093
+pause_ratio_to_speech,lower,less pause relative to speech = more fluent,0.184481
+rec_quality_score,higher,"higher = better recording (about the signal, not the voice)",99.9986
+rec_snr_db,higher,higher SNR = cleaner recording,35.5306
+rec_clipping_fraction,lower,lower = less clipping = cleaner recording,7.08191e-07
+speech_rate_syll_per_s,around,typical read speech mid range; much slower may indicate impairment,4.22778
+articulation_rate_syll_per_s,around,typical mid range; very slow may indicate impairment,5.00772
+syllable_count_used,neutral,syllables used for rate (exact if known passage),260
+speaking_time_fraction,higher,1.0 = no pauses; lower = more total time lost to PAUSING,0.844251
+filler_count,lower,fewer fillers = more fluent,0
+fillers_per_minute,lower,fewer fillers/min = more fluent,0
+filler_total_duration_s,lower,less filler time = more fluent,0
+filler_ratio_to_speech,lower,less filler relative to speech = more fluent,0
+ems_3_8hz_ratio,higher,stronger syllabic (3-8 Hz) envelope modulation = better rhythm/intelligibility; reduced in dysarthria,0.34354
+ems_peak_freq_hz,around,syllabic peak typically ~4-5 Hz; far from this is atypical,1.98374
+ems_syllabic_to_slow_ratio,higher,more syllabic vs slow modulation energy = crisper rhythm,0.629912
+npvi,around,onset-interval PVI proxy; mid range for English read speech (within-subject),53.5321
+vowel_space_area,higher,larger vowel space = clearer articulation (reduced in dysarthria),549929
+vowel_dispersion_logarea,higher,larger F1-F2 cloud = more articulatory expansion; SHRINKS with hypokinetic centralization,12.597
+vowel_cloud_spread_hz,higher,larger spread = more vowel differentiation; reduced in centralization,306.788
+fluency_intensity_stability,higher,higher = steadier loudness control (indicative),
+fluency_pitch_stability,higher,higher = healthier prosody (indicative),
+fluency_rhythm_regularity,higher,higher = more typical rhythm (indicative),
+fluency_voice_quality,higher,higher = cleaner voice (indicative),
+fluency_articulation,higher,higher = more typical rate (indicative),
+fluency_overall,higher,"higher = more fluent overall (INDICATIVE only, not validated)",
+sv_mpt_longest_s,higher,maximum phonation time: longer = better respiratory/phonatory support,
+sv_mpt_longest_uninterrupted_s,higher,"longest stretch of CONTINUOUS PHONATION inside a single token, with no break (>=50 ms below the phonation threshold or unvoiced) in the middle. Cannot exceed sv_mpt_longest_s; the gap between the two is how much of the best token was actually held. Read it with sv_n_breaks_in_best_token and sv_unbroken_energy_only_s in the audit block.",
+sv_mpt_mean_s,higher,mean token duration; longer = better sustained support,
+sv_total_phonation_s,neutral,total phonated time in the file; context only,
+sv_n_tokens,neutral,number of separate /a/ productions found in the file,
+sv_f0_sd_semitones,lower,lower = steadier pitch on sustained phonation (typ. < 0.5 st),
+sv_f0_drift_st_per_s,around,near 0 = no drift; large magnitude = failing pitch control across the token,
+sv_intensity_sd_db,lower,lower = steadier loudness within the window,
+sv_tremor_rate_hz,neutral,dominant 2-12 Hz F0 modulation rate; ~4-7 Hz typical of vocal tremor,
+sv_tremor_extent_st,lower,lower = less frequency tremor; large extent is a tremor sign,
+sv_cpps_token_db,higher,"CPPS over the whole token - computable even when the voice is too aperiodic for jitter/shimmer, so use it when they are blank",
+sv_hnr_token_db,higher,per-interval median HNR over the whole token; same role as above,
+sv_window_yield,higher,steady 2-3 s windows found / windows that would fit; low = the voice cannot hold a steady state,
+sv_intensity_decay_db_per_s,higher,"loudness fade across the longest token in dB PER SECOND (negative = fading). Unlike intensity_decay_db this does not scale with take length, so it is the one to compare when phonation duration varies between sessions.",
+sv_analyzed_fraction,higher,"seconds measured / seconds phonated. 1.0 = the whole vowel is behind the medians; 0.4 = 60% was discarded. Read it WITH sv_discard_interior_s: losing time at the onset and offset of a long take is normal, losing it in the middle is not. Also capped by geometry - about 0.8-0.95 is the best a clean take can reach, since the edge trim and the last part-window are always dropped",
+sv_window_yield_s,higher,"seconds measured / seconds the tiling COULD measure. The duration-weighted twin of sv_window_yield with the geometry divided out, so 1.0 means nothing was lost to the voice and a low value is a real steadiness finding rather than a short take",
+sv_steady_frame_fraction,higher,"fraction of phonated frames on which a valid analysis window could be CENTRED, computed frame by frame with no window grid. Unaffected by take length, and defined even when no window survived, so this is the column that separates 'the voice never held still' from 'the take was too short for the usability gate'. Jitter, tremor and slow drift do NOT lower it - they are measured elsewhere",
+sv_longest_steady_run_s,higher,longest uninterrupted steady stretch in seconds. 80% steady frames in one block and 80% scattered over ten islands are different findings and only this column separates them; it is also the honest upper bound on how long a window you could place,
+sv_f1f2_cloud_spread_hz,lower,same as above in Hz: lower = steadier vowel,
+sv_jitter_sd_across_tokens,lower,lower = more reproducible across repetitions of the same task,
+sv_shimmer_sd_across_tokens,lower,lower = more reproducible across repetitions,
+sv_hnr_sd_across_tokens,lower,lower = more reproducible across repetitions,
+"### AUDIT (73) - how it was measured, NOT measurements of the voice",,,
+task_is_sustained_vowel,neutral,"1 = sustained vowel, 0 = connected speech",0
+one_production_per_file,neutral,no directional guidance,1
+vq_measured,higher,1 = voice-quality actually measured,1
+cpps_is_praat,higher,1 = CPPS from Praat (trusted); 0 = FFT fallback (interpret cautiously),1
+syllable_source_known,higher,1 = rate from KNOWN passage count (exact); 0 = estimated,1
+syllable_count_estimated,neutral,"envelope-based syllable estimate, kept as a cross-check on the hand-entered constant; too noisy to use as a rate on its own",190
+syllable_count_agreement,around,"estimate / KNOWN_PASSAGE_SYLLABLES constant; ~1.0 = the constant matches the audio, outside 0.7-1.4 means one of the two is wrong (check the constant against your passage wording)",0.730769
+formant_track_ok,higher,"1 = F3 above F2 (valid track); 0 = LPC failure, F3/F4 discarded",1
+formant_ceiling_hz_used,neutral,formant ceiling chosen from the speaker's F0; context only,5500
+pitch_octave_repair_fraction,lower,fraction of frames corrected for octave errors; high value = check F0 range settings,0
+pitch_floor_used_hz,neutral,pitch floor this file was measured with; must be IDENTICAL across sessions of one subject,109.7
+pitch_ceiling_used_hz,neutral,pitch ceiling this file was measured with; must be IDENTICAL across sessions of one subject,317.1
+silence_threshold_db_used,neutral,silence line used for segmentation (dB rel. peak),-33.182
+f0_octave_ok,higher,"1 = harmonic comb confirms the tracked F0, 0.5 = ambiguous (check by ear), 0 = octave error or inconclusive",1
+f0_octave_corrected,lower,1 = the analysis range was doubled/halved by the comb check; verify this file by ear before using it,0
+f0_octave_score_ref_db,higher,"odd-vs-even harmonic contrast at the tracked F0; near 0 dB = real fundamental, very negative = subharmonic",1.39609
+f0_octave_score_half_db,lower,"same contrast one octave below; near 0 dB means a full comb also fits there, i.e. the tracker doubled",-1.24658
+f0_wide_median_hz,neutral,F0 an UNCONSTRAINED tracker would report; an octave below the in-range value means real subharmonic energy,186.061
+sv_measured,higher,1 = steady-state perturbation measures actually obtained,
+sv_usable,higher,1 = summary rests on enough valid steady-state signal; EXCLUDE files with 0 from group statistics,
+sv_windows_usable,higher,"1 = enough steady signal to trust the WINDOW medians (CPPS, window HNR, steadiness); governs the cepstral block",
+sv_perturbation_usable,higher,1 = jitter/shimmer are additionally stable and the signal type permits cycle-based measures; governs ONLY jitter and shimmer,
+sv_signal_type,lower,"1 = nearly periodic (jitter/shimmer valid), 2 = subharmonics (unreliable), 3 = aperiodic (perturbation UNDEFINED - use cepstral/spectral measures)",
+sv_n_windows_valid,higher,steady-state windows that passed validity checks; more = a better-supported median,
+sv_n_windows_total,neutral,windows tried before validity checks; context only,
+sv_measured_total_s,higher,seconds of steady phonation behind the medians; under ~10 s treat the numbers as provisional,
+sv_n_tokens_expected,neutral,tokens implied by breath gaps + edit points + 1,
+sv_token_count_mismatch,lower,"1 = segmentation disagrees with the gap count; MPT is suspect, supply boundaries instead",
+sv_boundaries_from_file,higher,"1 = token boundaries were supplied, not inferred",
+sv_n_splices_detected,lower,edit points found inside phonation; >0 means the file is cut/concatenated - prefer analysing the original clips separately,
+sv_analysis_window_s,neutral,length of the steady-state window actually measured; sanity-check only,
+sv_rej_low_voicing,lower,windows discarded for insufficient voicing,
+sv_rej_f0_outlier,lower,windows discarded as creak/subharmonic (off the speaker's F0),
+sv_rej_f0_step,lower,windows discarded for an internal F0 discontinuity,
+sv_rej_splice,lower,windows discarded for overlapping a detected edit point,
+sv_rej_other,lower,windows discarded for other reasons (no data / unmeasurable),
+sv_analyzable_total_s,neutral,seconds the tiling geometry could measure at best (after edge trim and the part-window remainder); the denominator of sv_window_yield_s,
+sv_discard_unsteady_s,lower,seconds discarded by the validity screen: the part of the loss that is about the VOICE,
+sv_discard_edge_s,neutral,"seconds removed by the fixed onset/offset trim; a setting, not a finding",
+sv_discard_quantisation_s,neutral,"seconds left over because the remainder was shorter than one window; a setting, not a finding (shorten vowel_window_max_s to recover it)",
+sv_discard_onset_s,lower,phonated seconds before the first measured window: onset instability plus the edge trim,
+sv_discard_interior_s,lower,phonated seconds discarded BETWEEN measured windows. The clearest single sign of a take that kept breaking down mid-vowel,
+sv_discard_offset_s,lower,"phonated seconds after the last measured window: offset decay, the edge trim and the part-window remainder",
+sv_discard_dead_token_s,lower,seconds in tokens that yielded no measured window at all,
+sv_n_interior_gaps,lower,number of separate unmeasured gaps inside the phonation; 0 = one continuous measured block,
+sv_n_steady_stretches,lower,how many separate steady stretches the frame-level analysis found; 1 = the voice held once and kept it,
+sv_voiced_at_045,higher,voiced fraction at Praat's default voicing threshold,
+sv_voiced_at_020,higher,"voiced fraction at a very permissive threshold; still low = the signal really is aperiodic, not a settings problem",
+sv_voiced_low_floor,higher,voiced fraction with a 60 Hz floor; rules out the pitch range as the cause of low voicing,
+sv_tremor_peak_ratio,neutral,prominence of the 2-12 Hz peak; below ~2.5 there is no measurable tremor and rate/extent are blank,
+sv_f1f2_dispersion_logarea,lower,on ONE sustained vowel a SMALLER F1-F2 cloud means steadier articulation (opposite meaning to the connected-speech version of this metric),
+sv_n_phonation_breaks,neutral,no directional guidance,
+sv_n_breaks_in_best_token,neutral,no directional guidance,
+sv_unbroken_start_s,neutral,no directional guidance,
+sv_unbroken_end_s,neutral,no directional guidance,
+sv_unbroken_token_index,neutral,no directional guidance,
+sv_unbroken_energy_only_s,neutral,no directional guidance,
+sv_unbroken_voicing_required,neutral,no directional guidance,
+sv_break_threshold_db,neutral,no directional guidance,
+sv_break_min_duration_s,neutral,no directional guidance,
+cpp_is_praat_cpps,neutral,no directional guidance,1
+spectral_span_intervals,neutral,no directional guidance,0
+formant_span_windows,neutral,no directional guidance,
+spectral_tilt_band_lo_hz,neutral,no directional guidance,50
+spectral_tilt_band_hi_hz,neutral,no directional guidance,5000
+pitch_block_from_windows,neutral,no directional guidance,
+rec_effective_bandwidth_hz,neutral,informational; low value alone does NOT mean bad voice,8807.08
+rec_spectral_edge_hz,neutral,informational; where the spectrum dies,1507.32
+rec_sample_rate_hz,neutral,recording property; context only,44100
+rec_is_bandlimited,lower,0 = full-band (good); 1 = telephone/codec cutoff (VQ unreliable),0
+rec_vq_reliable,higher,1 = voice-quality metrics trustworthy on this recording,1
+rec_snr_estimable,higher,1 = a silent reference existed so SNR is real; 0 = SNR not estimable (record room tone),1
+rec_digital_silence,lower,"1 = the silent reference is pasted/edited silence, so SNR describes the edit and not the recording",0
