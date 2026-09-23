@@ -449,8 +449,6 @@ Author and version metadata live in [`CITATION.cff`](CITATION.cff), which GitHub
 reads to put a **Cite this repository** button in the sidebar. Editing that file
 is enough; the button and the BibTeX below stay in step with it.
 
-<!-- Replace XXXXXXX with your Zenodo concept DOI -->
-
 ```bibtex
 @software{speechkit,
   author    = {Luca Pivetti},
