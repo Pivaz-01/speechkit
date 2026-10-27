@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "speechkit"
-version = "1.0.0"
-description = "Acoustic analysis, phoneme recognition and phoneme-to-text alignment for speech recordings"
+version = "1.1.0"
+description = "Acoustic analysis, phoneme recognition, phoneme-to-text alignment and DDK analysis for speech recordings"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 # 3.10 is the floor because librosa needs numba, and numba 0.61 dropped
@@ -21,7 +21,9 @@ dependencies = [
 acoustics = ["librosa>=0.10", "soundfile>=0.12", "matplotlib>=3.7", "praat-parselmouth>=0.4.3"]
 phonemes = ["torch>=2.0", "transformers>=4.35", "huggingface_hub>=0.19", "soundfile>=0.12"]
 espeak = ["phonemizer>=3.2"]
-all = ["speechkit[acoustics,phonemes]"]
+ddk = ["pandas>=2.0", "openpyxl>=3.1", "matplotlib>=3.7"]
+ddk-mat73 = ["h5py>=3.8"]
+all = ["speechkit[acoustics,phonemes,ddk]"]
 
 [project.scripts]
 speechkit = "speechkit.cli:main"

@@ -14,6 +14,10 @@ const STAGES = [
   { id: 'alignment', title: 'Alignment to text', run: 'Align to passage text',
     blurb: 'Compares the phonemes produced against the canonical sequence for the ' +
            'passage, word by word, and reports accuracy.' },
+  { id: 'ddk', title: 'DDK analysis', run: 'Run DDK analysis',
+    blurb: 'Rate and regularity of /pa/ /ta/ /ka/ /pataka/ repetitions listed in a ' +
+           'metadata sheet: whole trial, best window, and the first nine syllables as ' +
+           'in Pierce, Cotton & Perry (2013), with their statistics.' },
   { id: 'server', title: 'Server', run: null,
     blurb: 'Where this interface listens, and how it loads native libraries.' },
 ];
@@ -92,7 +96,7 @@ async function boot() {
 function renderEnv() {
   const wrap = $('#env');
   wrap.textContent = '';
-  for (const s of ['acoustics', 'phonemes', 'alignment']) {
+  for (const s of ['acoustics', 'phonemes', 'alignment', 'ddk']) {
     const info = state.env.stages[s];
     const chip = el('span', {
       className: 'chip',
@@ -248,6 +252,18 @@ function taskPicker() {
   }
   wrap.append(note);
   return wrap;
+}
+
+// Why a stage cannot start yet, or '' if it can. Dependencies are checked
+// separately, because they come with their own install hint.
+function runBlocked(stageId) {
+  if (stageId === 'acoustics' && !currentTask()) {
+    return 'Choose what is in these recordings first';
+  }
+  if (stageId === 'ddk' && !String(state.values.DDK_INPUT || '').trim()) {
+    return 'Choose the subject folder first';
+  }
+  return '';
 }
 
 function button(text, onclick, cls = '') {
@@ -587,9 +603,9 @@ function renderRunbar() {
   if (!info.ready) {
     runBtn.disabled = true;
     runBtn.title = 'pip install ' + info.missing.join(' ');
-  } else if (stage.id === 'acoustics' && !currentTask()) {
+  } else if (runBlocked(stage.id)) {
     runBtn.disabled = true;
-    runBtn.title = 'Choose what is in these recordings first';
+    runBtn.title = runBlocked(stage.id);
   }
   const stopBtn = button('Stop', cancelJob, 'danger');
   stopBtn.id = 'stopBtn';
@@ -647,9 +663,12 @@ async function pollJob() {
       : `${status.state} · ${mins}:${secs}` +
         (status.stage && status.stage !== state.stage ? ` (${status.stage})` : '');
   }
-  if (runBtn) runBtn.disabled = status.running
-    || !state.env.stages[state.stage]?.ready
-    || (state.stage === 'acoustics' && !currentTask());
+  if (runBtn) {
+    runBtn.disabled = status.running
+      || !state.env.stages[state.stage]?.ready
+      || Boolean(runBlocked(state.stage));
+    if (state.env.stages[state.stage]?.ready) runBtn.title = runBlocked(state.stage);
+  }
   if (stopBtn) stopBtn.disabled = !status.running;
 
   if (status.summary) renderSummary(status.summary);
@@ -697,6 +716,19 @@ function renderSummary(summary) {
   if (s.kind === 'acoustics') {
     wrap.append(el('h3', {}, `Output (${s.files} recording${s.files === 1 ? '' : 's'})`));
     wrap.append(fileLinks(s.outputs || []));
+  }
+
+  if (s.kind === 'ddk') {
+    wrap.append(el('h3', {}, `Subject ${s.subject}`));
+    wrap.append(table(
+      ['trials', 'sessions', 'errors', 'file-check entries'],
+      [[s.trials, s.sessions, s.errors, s.issues]],
+      [true, true, true, true]));
+    wrap.append(fileLinks(s.outputs || []));
+    if (s.folders && s.folders.length) {
+      wrap.append(el('div', { className: 'meta' },
+        'Audio segments in ' + s.folders.join(', ')));
+    }
   }
 }
 

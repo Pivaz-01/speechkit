@@ -2,11 +2,12 @@
 speechkit — acoustic analysis, phoneme recognition and phoneme-to-text
 alignment for speech recordings, behind one local interface.
 
-Three stages, each usable on its own:
+Four stages, each usable on its own:
 
     from speechkit.acoustics import analyze_files, run_acoustics
     from speechkit.phonemes import decode_file, run_phonemes
     from speechkit.alignment import run_alignment
+    from speechkit.ddk import run_ddk
 
 The heavy dependencies are imported lazily by the modules that need them, so
 importing this package costs nothing and the interface can open and report a
@@ -20,7 +21,7 @@ import sys
 
 from . import _winsetup
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # Must run before torch, parselmouth or soundfile pull in native libraries.
 _winsetup.configure()
@@ -43,10 +44,18 @@ _REQUIREMENTS = {
         ("huggingface_hub", "huggingface_hub"),
     ],
     "alignment": [],          # standard library only
+    "ddk": [
+        ("numpy", "numpy"),
+        ("scipy", "scipy"),
+        ("pandas", "pandas"),
+        ("matplotlib", "matplotlib"),
+        ("openpyxl", "openpyxl"),
+    ],
 }
 
 _OPTIONAL = {
     "alignment": [("phonemizer", "phonemizer")],
+    "ddk": [("h5py", "h5py")],          # only for MATLAB -v7.3 .mat trials
 }
 
 

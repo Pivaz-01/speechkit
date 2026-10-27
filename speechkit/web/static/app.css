@@ -93,6 +93,10 @@
   --stage: #ff9500;  --stage-on: #1d1d1f;  --stage-ink: #9a5b00;
   --stage-tint: rgba(255, 149, 0, 0.14);  --stage-halo: rgba(255, 149, 0, 0.30);
 }
+[data-stage="ddk"] {
+  --stage: #00819a;  --stage-on: #ffffff;  --stage-ink: #006d82;
+  --stage-tint: rgba(0, 129, 154, 0.10);  --stage-halo: rgba(0, 129, 154, 0.25);
+}
 [data-stage="server"] {
   --stage: #8e8e93;  --stage-on: #ffffff;  --stage-ink: #6e6e73;
   --stage-tint: rgba(142, 142, 147, 0.14);  --stage-halo: rgba(142, 142, 147, 0.28);
@@ -136,6 +140,10 @@
   [data-stage="alignment"] {
     --stage: #ff9f0a;  --stage-ink: #ffb340;
     --stage-tint: rgba(255, 159, 10, 0.20);  --stage-halo: rgba(255, 159, 10, 0.34);
+  }
+  [data-stage="ddk"] {
+    --stage: #40c8e0;  --stage-on: #1d1d1f;  --stage-ink: #64d2e6;
+    --stage-tint: rgba(64, 200, 224, 0.20);  --stage-halo: rgba(64, 200, 224, 0.34);
   }
   [data-stage="server"] {
     --stage: #98989d;  --stage-ink: #aeaeb2;
@@ -786,6 +794,7 @@ table.data th.num, table.data td.num { text-align: right; padding-right: 22px; }
   text-decoration: none;
 }
 .filelist .meta { font-size: 12.5px; color: var(--ink3); }
+.results > .meta { font-size: 12.5px; color: var(--ink3); margin-top: 10px; }
 
 /* ----------------------------------------------------------------- picker */
 

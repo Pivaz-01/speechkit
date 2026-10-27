@@ -7,4 +7,8 @@ without anyone needing to know the module syntax.
 
 from speechkit.cli import main
 
-raise SystemExit(main(["serve"]))
+# The guard matters: the DDK stage runs its trials in worker processes, and on
+# Windows and macOS each worker re-imports this file. Without it, every worker
+# would start another copy of the interface.
+if __name__ == "__main__":
+    raise SystemExit(main(["serve"]))

@@ -25,6 +25,12 @@ torch>=2.0
 transformers>=4.35
 huggingface_hub>=0.19
 
+# DDK analysis stage (numpy, scipy and matplotlib are listed above).
+pandas>=2.0
+openpyxl>=3.1
+# Only for MATLAB -v7.3 .mat trials:
+# h5py>=3.8
+
 # Optional. Replaces the built-in English letter-to-sound guesser used for
 # word-boundary assignment in the alignment stage, and needs the espeak-ng
 # binary installed separately.

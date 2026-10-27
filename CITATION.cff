@@ -11,10 +11,11 @@ abstract: >-
   An open-source tool that combines whole-recording acoustic measurement via
   Praat, phoneme-level recognition with wav2vec2 and manual review, and
   alignment of produced phonemes to the reference text of a reading passage,
-  behind a single local interface.
+  and batch analysis of diadochokinetic rate and regularity, behind a single
+  local interface.
 type: software
-version: 1.0.0
-date-released: "2026-09-15"          
+version: 1.1.0
+date-released: "2026-10-27"          
 license: GPL-3.0          
 repository-code: "https://github.com/Pivaz-01/speechkit"
 url: "https://github.com/Pivaz-01/speechkit"
@@ -33,6 +34,7 @@ keywords:
   - acoustic analysis
   - phoneme recognition
   - forced alignment
+  - diadochokinesis
   - dysarthria
   - Praat
   - wav2vec2
@@ -84,3 +86,18 @@ references:
     year: 2021
     doi: 10.48550/arXiv.2109.11680
     url: "https://arxiv.org/abs/2109.11680"
+  - type: article
+    title: Alternating and sequential motion rates in older adults
+    authors:
+      - given-names: John E.
+        family-names: Pierce
+      - given-names: Susan
+        family-names: Cotton
+      - given-names: Alison
+        family-names: Perry
+    journal: International Journal of Language & Communication Disorders
+    volume: 48
+    issue: 3
+    start: 257
+    end: 264
+    year: 2013

@@ -5,6 +5,7 @@ Command line, for scripting and for running a stage without the interface.
     python -m speechkit acoustics FOLDER -o OUT
     python -m speechkit phonemes FOLDER
     python -m speechkit align FOLDER
+    python -m speechkit ddk FOLDER -o OUT    DDK rate and regularity
     python -m speechkit env                  what is installed
     python -m speechkit settings             print the current settings as JSON
 
@@ -74,6 +75,15 @@ def main(argv=None) -> int:
                                 "set in the interface")
         p.add_argument("--set", action="append", metavar="NAME=VALUE",
                        help="override any setting; repeatable")
+
+    ddk_p = sub.add_parser("ddk", help="DDK rate and regularity from a metadata sheet")
+    ddk_p.add_argument("input", nargs="?",
+                       help="subject folder: day folders plus the metadata sheet")
+    ddk_p.add_argument("-o", "--output", help="output folder (default: INPUT/DDK_results)")
+    ddk_p.add_argument("-m", "--metadata", help="metadata sheet, if not the only one in INPUT")
+    ddk_p.add_argument("-s", "--subject", help="subject ID (default: from the sheet name)")
+    ddk_p.add_argument("--set", action="append", metavar="NAME=VALUE",
+                       help="override any setting, e.g. DDK_SAVE_PLOTS=true; repeatable")
 
     sub.add_parser("env", help="report what is installed")
     sub.add_parser("settings", help="print the current settings as JSON")
@@ -147,6 +157,24 @@ def main(argv=None) -> int:
         try:
             run_alignment(values)
         except (ValueError, FileNotFoundError) as exc:
+            raise SystemExit(str(exc)) from None
+        return 0
+
+    if command == "ddk":
+        if args.input:
+            values["DDK_INPUT"] = args.input
+        if args.output:
+            values["DDK_OUTPUT"] = args.output
+        if args.metadata:
+            values["DDK_METADATA_FILE"] = args.metadata
+        if args.subject:
+            values["DDK_SUBJECT_ID"] = args.subject
+        _require("ddk")
+        from .ddk import run_ddk
+
+        try:
+            run_ddk(values)
+        except ValueError as exc:
             raise SystemExit(str(exc)) from None
         return 0
 

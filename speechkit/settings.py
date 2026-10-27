@@ -37,7 +37,7 @@ class Setting:
     label: str                      # what the interface calls it
     kind: str                       # text|path|dir|paths|int|float|float_or_none|bool|choice|json|passages
     default: Any
-    section: str                    # acoustics | phonemes | alignment | server
+    section: str                    # acoustics | phonemes | alignment | ddk | server
     group: str                      # fieldset heading inside the section
     help: str = ""
     choices: tuple[tuple[str, str], ...] = ()   # (value, label) for kind="choice"
@@ -389,6 +389,249 @@ _ALIGNMENT: tuple[Setting, ...] = (
 )
 
 # =============================================================================
+# DDK ANALYSIS  (was the constants block at the top of ddk_analysis.py)
+# Each DDK_<NAME> is copied onto the constant <NAME> in ddk.py by configure().
+# =============================================================================
+
+_DDK: tuple[Setting, ...] = (
+    Setting("DDK_INPUT", "Subject folder", "dir", "",
+            "ddk", "Input and output",
+            "Holds one folder per recording day, named MMDD (e.g. 0309), and the metadata "
+            "sheet. Only trials listed in the sheet are analysed; each file is found by "
+            "name anywhere under this folder."),
+    Setting("DDK_OUTPUT", "Output folder", "dir", "",
+            "ddk", "Input and output",
+            "Receives DDK_results_<subject>.xlsx and DDK_file_check_<subject>.xlsx. "
+            "Leave empty to write into a DDK_results folder inside the subject folder."),
+    Setting("DDK_METADATA_FILE", "Metadata sheet", "path", "",
+            "ddk", "Input and output",
+            "One row per audio trial: date, audio number, stimulation, file name, cue. "
+            "Leave empty to use the single .xlsx, .xls or .csv placed directly in the "
+            "subject folder. A relative path is read from inside the subject folder."),
+    Setting("DDK_SUBJECT_ID", "Subject ID", "text", "",
+            "ddk", "Input and output",
+            "Used in the output file names and to look up per-subject peak parameters. "
+            "Leave empty to take it from the metadata file name (ddk_S04.xlsx gives S04)."),
+
+    Setting("DDK_METADATA_SHEET", "Sheet", "text", "0",
+            "ddk", "Metadata columns",
+            "Sheet index (0 is the first) or sheet name. Excel files only.",
+            advanced=True),
+    Setting("DDK_COL_DATE", "Session date column", "text", "SessionDate",
+            "ddk", "Metadata columns", "Matched case-insensitively.", advanced=True),
+    Setting("DDK_COL_AUDIO", "Audio number column", "text", "Audio",
+            "ddk", "Metadata columns",
+            "A session is one date x audio-number recording.", advanced=True),
+    Setting("DDK_COL_STIM", "Stimulation column", "text", "Stim",
+            "ddk", "Metadata columns", advanced=True),
+    Setting("DDK_COL_FILENAME", "File name column", "text", "Filename",
+            "ddk", "Metadata columns", advanced=True),
+    Setting("DDK_COL_CUE", "Cue column", "text", "CueLabel",
+            "ddk", "Metadata columns", advanced=True),
+
+    Setting("DDK_MIN_PEAK_DISTANCE_S", "Minimum peak distance (s)", "float", 0.12,
+            "ddk", "Syllable detection",
+            "MATLAB findpeaks MinPeakDistance on the smoothed envelope. These four values "
+            "apply to every subject without an entry in the per-subject table below.",
+            minimum=0.01, maximum=1.0, step=0.01),
+    Setting("DDK_MIN_PEAK_HEIGHT", "Minimum peak height", "float", 0.10,
+            "ddk", "Syllable detection",
+            "MinPeakHeight, on the envelope normalised to its maximum.",
+            minimum=0.0, maximum=1.0, step=0.01),
+    Setting("DDK_MIN_PEAK_PROMINENCE", "Minimum peak prominence", "float", 0.10,
+            "ddk", "Syllable detection",
+            "MinPeakProminence, on the normalised envelope.",
+            minimum=0.0, maximum=1.0, step=0.01),
+    Setting("DDK_SMOOTH_WINDOW_S", "Envelope smoothing window (s)", "float", 0.10,
+            "ddk", "Syllable detection",
+            "Moving-mean length applied to the Hilbert envelope.",
+            minimum=0.001, maximum=1.0, step=0.005),
+    Setting("DDK_PEAK_PARAMS", "Per-subject peak parameters", "json", {},
+            "ddk", "Syllable detection",
+            'Overrides the four values above for named subjects: '
+            '{"S04": [0.12, 0.10, 0.15, 0.10]}, in the order minPeakDistance (s), '
+            'minPeakHeight, minPeakProminence, smoothWindow (s). A subject ID also matches '
+            'a longer key that ends with it, so S04 finds PD_S04. These are study data: '
+            'keep them in a saved preset rather than in the code.'),
+    Setting("DDK_ENERGY_THRESH", "Active-speech RMS threshold", "float", 0.10,
+            "ddk", "Syllable detection",
+            "On the normalised envelope, in 20 ms frames every 10 ms. The span from the "
+            "first to the last frame above it is the active speech that the whole-trial "
+            "rate is divided by.",
+            minimum=0.0, maximum=1.0, step=0.01),
+    Setting("DDK_TRIPLET_WIN", "Syllables per local-rate window", "int", 3,
+            "ddk", "Syllable detection",
+            "Window for the instantaneous-rate CV.",
+            minimum=2, maximum=20, step=1, advanced=True),
+    Setting("DDK_BANDPASS_LOW_HZ", "Band-pass low edge (Hz)", "float", 100.0,
+            "ddk", "Syllable detection",
+            minimum=10.0, maximum=2000.0, step=10.0, advanced=True),
+    Setting("DDK_BANDPASS_HIGH_HZ", "Band-pass high edge (Hz)", "float", 4000.0,
+            "ddk", "Syllable detection",
+            "Capped at half the sample rate minus 100 Hz, as in MATLAB.",
+            minimum=500.0, maximum=20000.0, step=100.0, advanced=True),
+    Setting("DDK_FILTER_ORDER", "Band-pass filter order", "int", 4,
+            "ddk", "Syllable detection",
+            "Total order, as MATLAB designfilt 'FilterOrder'. Must be even. The filter is "
+            "zero-phase Butterworth.",
+            minimum=2, maximum=12, step=2, advanced=True),
+
+    Setting("DDK_BEST_WIN_SEC", "Window length (s)", "float", 3.0,
+            "ddk", "Best window",
+            "Rate = syllables in the window / window length, re-using the whole-trial "
+            "peaks. Needs at least 2 syllables; the ISI CV needs 3.",
+            minimum=0.5, maximum=30.0, step=0.5),
+    Setting("DDK_BEST_WIN_CRITERION", "Window chosen by", "choice", "max_rate",
+            "ddk", "Best window",
+            "Candidate windows for the first two criteria lie inside the active-speech "
+            "span. 'Speech onset' with a 4 s window reproduces "
+            "DDK_processing_updatedCode_08_17_26.m.",
+            choices=(("max_rate", "Most syllables (ties: lowest ISI CV, then earliest)"),
+                     ("min_isi_cv", "Most regular, lowest ISI CV with >= 3 syllables"),
+                     ("first", "Starting at speech onset"))),
+    Setting("DDK_BEST_WIN_STEP_SEC", "Sliding step (s)", "float", 0.01,
+            "ddk", "Best window",
+            minimum=0.001, maximum=1.0, step=0.001, advanced=True),
+
+    Setting("DDK_PIERCE_N_SYLL", "Syllables measured", "int", 9,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            "From the onset of glottal pulsing of syllable 1 to that of syllable N + 1; "
+            "rate = N / duration (duration to 4 dp, rate to 1 dp). The paper uses nine, "
+            "three complete /pataka/. The column prefix follows it: Pierce9_.",
+            minimum=2, maximum=50, step=1),
+    Setting("DDK_PIERCE_MIN_SPEECH_SEC", "Minimum repetition (s)", "float", 4.0,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            "Shorter trials are measured but excluded from the statistics, as in the paper.",
+            minimum=0.0, maximum=60.0, step=0.5),
+    Setting("DDK_PIERCE_VAR_TIMES", "Variability measured on", "choice", "onsets",
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            "Which time point marks each of the same syllables for ISI mean, ISI CV and "
+            "InstRate CV.",
+            choices=(("onsets", "Voicing onsets (ISI mean = duration / N)"),
+                     ("peaks", "Envelope peaks (as the whole-trial and best-window measures)"))),
+    Setting("DDK_VOICING_LOW_HZ", "Voicing band low edge (Hz)", "float", 60.0,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            "The band carrying glottal pulsing (F0 and low harmonics), which voiceless "
+            "bursts and aspiration lack.",
+            minimum=20.0, maximum=1000.0, step=5.0, advanced=True),
+    Setting("DDK_VOICING_HIGH_HZ", "Voicing band high edge (Hz)", "float", 500.0,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            minimum=100.0, maximum=4000.0, step=10.0, advanced=True),
+    Setting("DDK_VOICING_SMOOTH_SEC", "Voicing envelope smoothing (s)", "float", 0.005,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            minimum=0.0, maximum=0.1, step=0.001, advanced=True),
+    Setting("DDK_VOICING_ONSET_FRAC", "Onset threshold (fraction of peak)", "float", 0.20,
+            "ddk", "Pierce, Cotton & Perry (2013)",
+            "The onset is the last rise through this fraction of the syllable's voiced peak.",
+            minimum=0.01, maximum=0.99, step=0.01, advanced=True),
+
+    Setting("DDK_RUN_STATS", "Run the statistics", "bool", True,
+            "ddk", "Statistics",
+            "Normality screening, normative table (paper's Table 3), Levene's test and "
+            "ANOVA. Unit of analysis: one value per session x task."),
+    Setting("DDK_GROUP_FACTORS", "Group factors", "text", "Stim",
+            "ddk", "Statistics",
+            "Comma-separated session-level columns: Stim, Day, Date, Audio, or any column "
+            "added to the metadata sheet. Two factors give a two-way ANOVA; the paper used "
+            "AgeGroup, Gender.",
+            depends_on="DDK_RUN_STATS", depends_value=True),
+    Setting("DDK_LEVENE_FACTOR", "Levene factor", "text", "Stim",
+            "ddk", "Statistics",
+            "Paper: AgeGroup.",
+            depends_on="DDK_RUN_STATS", depends_value=True),
+    Setting("DDK_STATS_STIM_LEVELS", "Stim levels kept", "text", "OFF, ON",
+            "ddk", "Statistics",
+            "Comma-separated. Leave empty to keep every level, so PRE, POST or FU become "
+            "groups of their own.",
+            depends_on="DDK_RUN_STATS", depends_value=True),
+    Setting("DDK_MEDIAN_SPLIT", "Median-split columns", "text", "",
+            "ddk", "Statistics",
+            "Numeric metadata columns split at the median into a factor called "
+            "<column>_split. The paper split Age.",
+            depends_on="DDK_RUN_STATS", depends_value=True, advanced=True),
+    Setting("DDK_ANOVA_INTERACTION", "Test the interaction", "bool", True,
+            "ddk", "Statistics",
+            "With two factors. Dropped automatically when a cell is empty.",
+            depends_on="DDK_RUN_STATS", depends_value=True, advanced=True),
+    Setting("DDK_EXCLUDE_IQR_OUTLIERS", "Remove 1.5 x IQR outliers", "bool", True,
+            "ddk", "Statistics",
+            "Before the tests, per task, as in the paper.",
+            depends_on="DDK_RUN_STATS", depends_value=True),
+    Setting("DDK_TRIAL_AGG", "Trials per session and task", "choice", "first",
+            "ddk", "Statistics",
+            "The paper recorded a single trial per task.",
+            choices=(("first", "First valid trial"),
+                     ("mean", "Mean of the valid trials"),
+                     ("median", "Median of the valid trials")),
+            depends_on="DDK_RUN_STATS", depends_value=True),
+    Setting("DDK_STATS_METRICS", "Metrics tested", "text", "Pierce9_DDK_Rate",
+            "ddk", "Statistics",
+            "Comma-separated column names of the Trials sheet, e.g. Pierce9_ISI_CV, "
+            "Pierce9_InstRate_CV, Best3s_DDK_Rate. The prefixes follow the window length "
+            "and the number of syllables measured.",
+            depends_on="DDK_RUN_STATS", depends_value=True),
+
+    Setting("DDK_RELIABILITY_EXPORT", "Export a sample for manual measurement", "bool", False,
+            "ddk", "Reliability",
+            "Writes OUTPUT/reliability/: a sample sheet and the WAV files to measure by hand "
+            "in Praat, blind to the automatic values. An existing filled-in sheet is never "
+            "overwritten."),
+    Setting("DDK_RELIABILITY_FRACTION", "Share of sessions sampled", "float", 0.10,
+            "ddk", "Reliability",
+            "The paper re-measured 10 % of participants.",
+            minimum=0.01, maximum=1.0, step=0.01,
+            depends_on="DDK_RELIABILITY_EXPORT", depends_value=True),
+    Setting("DDK_RELIABILITY_SEED", "Random seed", "int", 2013,
+            "ddk", "Reliability",
+            "Fixed, so the same sessions are drawn every time.",
+            minimum=0, maximum=2**31 - 1, step=1, advanced=True,
+            depends_on="DDK_RELIABILITY_EXPORT", depends_value=True),
+    Setting("DDK_RELIABILITY_FILE", "Filled-in sample sheet", "path", "",
+            "ddk", "Reliability",
+            "The sample sheet with ManualDurationSec filled in. Adds ICC(2,1) and ICC(3,1) "
+            "of automatic versus manual measurement to the results."),
+
+    Setting("DDK_CUES", "Cues", "text", "pataka, tatata, papapa, kakaka",
+            "ddk", "Session summary",
+            "Comma-separated, as written in the cue column. Each cue is its own task."),
+    Setting("DDK_AMR_CUES", "AMR cues", "text", "tatata, papapa, kakaka",
+            "ddk", "Session summary",
+            "AMR is the mean of these cue means. Every one must also be in the list above."),
+
+    Setting("DDK_SAVE_SEGMENTS", "Save the selected segments", "bool", True,
+            "ddk", "Outputs",
+            "One 16-bit WAV per trial of the best window and of the Pierce selection, in "
+            "OUTPUT/best3s segments and OUTPUT/pierce9 segments."),
+    Setting("DDK_SEGMENT_PAD_SEC", "Segment margin (s)", "float", 0.0,
+            "ddk", "Outputs",
+            "Added before and after each segment. 0 is exactly the selection.",
+            minimum=0.0, maximum=5.0, step=0.05,
+            depends_on="DDK_SAVE_SEGMENTS", depends_value=True),
+    Setting("DDK_SAVE_PLOTS", "Diagnostic plots", "bool", False,
+            "ddk", "Outputs",
+            "One PDF, DDK_plots_<subject>.pdf, with a page per trial: waveform, envelope "
+            "and peaks, local rate, and the paper's waveform and spectrogram view of the "
+            "Pierce selection for checking the onsets."),
+    Setting("DDK_SAVE_MATLAB_FILES", "Files for the MATLAB scripts", "bool", False,
+            "ddk", "Outputs",
+            "Per-session CSVs and DDK_mat/ files in the layout the old MATLAB scripts read.",
+            advanced=True),
+    Setting("DDK_N_WORKERS", "Worker processes", "int", 0,
+            "ddk", "Outputs",
+            "0 uses every CPU core but one; 1 runs serially.",
+            minimum=0, maximum=256, step=1, advanced=True),
+
+    Setting("DDK_AUDIO_EXTENSIONS", "Audio file types", "text", ".mat, .wav",
+            "ddk", "Input files",
+            "Comma-separated. MATLAB -v7.3 .mat files also need h5py installed.",
+            advanced=True),
+    Setting("DDK_MAT_AUDIO_VAR", "Audio variable in .mat files", "text", "audioDataSegment",
+            "ddk", "Input files", advanced=True),
+    Setting("DDK_MAT_FS_VAR", "Sample-rate variable in .mat files", "text", "fs",
+            "ddk", "Input files", advanced=True),
+)
+
+# =============================================================================
 # SERVER
 # =============================================================================
 
@@ -409,13 +652,14 @@ _SERVER: tuple[Setting, ...] = (
             advanced=True),
 )
 
-SETTINGS: tuple[Setting, ...] = _ACOUSTICS + _PHONEMES + _ALIGNMENT + _SERVER
+SETTINGS: tuple[Setting, ...] = _ACOUSTICS + _PHONEMES + _ALIGNMENT + _DDK + _SERVER
 BY_NAME: dict[str, Setting] = {s.name: s for s in SETTINGS}
 
 SECTION_TITLES = {
     "acoustics": "Acoustic analysis",
     "phonemes": "Phoneme recognition",
     "alignment": "Alignment to text",
+    "ddk": "DDK analysis",
     "server": "Server",
 }
 

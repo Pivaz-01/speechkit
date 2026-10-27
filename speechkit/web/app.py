@@ -216,7 +216,8 @@ def _list_dirs(folder: Path) -> list[dict[str, Any]]:
 def _list_wavs(folder: Path) -> list[dict[str, Any]]:
     out = []
     for p in sorted(folder.iterdir(), key=lambda x: x.name.lower()):
-        if p.is_file() and p.suffix.lower() in {".wav", ".txt", ".tsv", ".csv", ".json"}:
+        if p.is_file() and p.suffix.lower() in {".wav", ".txt", ".tsv", ".csv", ".json",
+                                                ".xlsx", ".xls", ".mat"}:
             try:
                 size = p.stat().st_size
             except OSError:
@@ -272,10 +273,17 @@ def _stage_alignment(cfg, log, should_stop):
     return run_alignment(cfg, log)
 
 
+def _stage_ddk(cfg, log, should_stop):
+    from ..ddk import run_ddk
+
+    return run_ddk(cfg, log, should_stop)
+
+
 STAGES = {
     "acoustics": _stage_acoustics,
     "phonemes": _stage_phonemes,
     "alignment": _stage_alignment,
+    "ddk": _stage_ddk,
 }
 
 
@@ -291,6 +299,12 @@ def api_run(stage: str):
     except settings.SettingError as exc:
         return jsonify({"error": str(exc)}), 400
     settings.save(VALUES)
+
+    if stage == "ddk" and not str(VALUES.get("DDK_INPUT", "")).strip():
+        return jsonify({
+            "error": "Choose the subject folder first: the folder that holds the day "
+                     "folders and the metadata sheet."
+        }), 400
 
     if stage == "acoustics" and not str(VALUES.get("TASK", "")).strip():
         return jsonify({
@@ -370,6 +384,14 @@ def _summarise(job) -> dict[str, Any]:
                 "files": len(job.result or []),
                 "outputs": produced,
                 "folder": folder}
+    if job.stage == "ddk" and isinstance(job.result, dict):
+        r = job.result
+        outputs = [{"name": Path(p).name, "path": p, "size": Path(p).stat().st_size}
+                   for p in r.get("outputs", []) if Path(p).is_file()]
+        return {"kind": "ddk", "subject": r.get("subject"), "trials": r.get("trials"),
+                "sessions": r.get("sessions"), "errors": r.get("errors"),
+                "issues": r.get("issues"), "outputs": outputs,
+                "folder": r.get("folder"), "folders": r.get("folders", [])}
     return {"kind": job.stage}
 
 
