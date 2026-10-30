@@ -5,6 +5,8 @@ venv/
 build/
 dist/
 *.egg-info/
+.vscode/
+.idea/
 
 # Never commit recordings or analysis output: they are participant data.
 
