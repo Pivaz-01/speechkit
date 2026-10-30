@@ -5,8 +5,8 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 title: >-
-  speechkit: acoustic analysis, phoneme recognition and phoneme-to-text
-  alignment for speech recordings
+  speechkit: acoustic analysis, phoneme recognition, phoneme-to-text
+  alignment and diadochokinetic analysis for speech recordings
 abstract: >-
   An open-source tool that combines whole-recording acoustic measurement via
   Praat, phoneme-level recognition with wav2vec2 and manual review, and
@@ -15,14 +15,14 @@ abstract: >-
   local interface.
 type: software
 version: 1.1.0
-date-released: "2026-10-27"          
-license: GPL-3.0          
+date-released: "2026-10-27"
+license: GPL-3.0-or-later
 repository-code: "https://github.com/Pivaz-01/speechkit"
 url: "https://github.com/Pivaz-01/speechkit"
 
 authors:
-  - given-names: Luca               
-    family-names: Pivetti       
+  - given-names: Luca
+    family-names: Pivetti
     # orcid: "https://orcid.org/0000-0000-0000-0000"
     # affiliation: Your Department, Your University
 
@@ -39,8 +39,8 @@ keywords:
   - Praat
   - wav2vec2
 
-# Uncomment once you have a Zenodo DOI (see the README). Use the CONCEPT DOI,
-# the one that always resolves to the newest release, not the version DOI.
+# Zenodo DOI. Use the CONCEPT DOI, the one that always resolves to the newest
+# release, not the version DOI.
 identifiers:
   - type: doi
     value: 10.5281/zenodo.22775433
@@ -101,3 +101,4 @@ references:
     start: 257
     end: 264
     year: 2013
+    doi: 10.1111/1460-6984.12001

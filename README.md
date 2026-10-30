@@ -3,14 +3,16 @@
 Acoustic analysis, phoneme recognition, phoneme-to-text alignment and
 diadochokinetic (DDK) analysis for speech recordings, behind one local interface.
 
-speechkit brings together three things researchers usually do with three
-separate scripts. It measures a recording the way Praat would, it labels every
-phoneme and pause in that recording, and it compares what a speaker actually
-produced against the text they were asked to read. Each stage works on its own,
-and together they describe one recording from waveform to per-phoneme accuracy.
+speechkit brings together four things researchers usually do with separate
+scripts. It measures a recording the way Praat would, it labels every phoneme
+and pause in that recording, it compares what a speaker actually produced
+against the text they were asked to read, and it measures diadochokinesis: the
+rate and regularity of /pa/ /ta/ /ka/ /pataka/ repetitions, for every session of
+a subject at once, driven by a metadata sheet.
 
-A fourth stage measures diadochokinesis: the rate and regularity of /pa/ /ta/
-/ka/ /pataka/ repetitions, for a whole study at once, driven by a metadata sheet.
+Each stage works on its own. The first three together describe one recording
+from waveform to per-phoneme accuracy; the DDK stage works on a subject folder
+of repetition trials.
 
 It runs entirely on your own machine. No audio is uploaded anywhere.
 
@@ -50,7 +52,8 @@ session.
 
 **DDK analysis.** Finds every syllable of a diadochokinetic trial as a peak of
 the band-passed Hilbert envelope, with MATLAB's `findpeaks` rules ported exactly,
-and reports rate, ISI mean, ISI CV and local-rate CV three ways: over the whole
+and reports rate, ISI mean, ISI CV and InstRate CV (the CV of the local rate over
+sliding 3-syllable windows) three ways: over the whole
 trial, over the best 3-second window, and over the first nine syllables measured
 from the onset of glottal pulsing as in Pierce, Cotton and Perry (2013). The
 statistics of that paper come with it: normality screening, the normative table,
@@ -58,6 +61,21 @@ Levene's test, ANOVA with partial eta squared, and a reliability export for
 re-measuring a sample by hand. Results come out as one Excel workbook per
 subject, plus a file check listing every missing, unlisted or misplaced
 recording.
+
+### What each stage reports
+
+| Stage | Unit | What comes out |
+|---|---|---|
+| Acoustic analysis | one recording | 103 metrics in total: 60 shared by both tasks, 21 reading-only, 22 sustained-only. A reading file carries 81, a sustained file 82; the other task's block is blank by design. Plus 73 audit columns, which are provenance, not metrics. |
+| Phoneme recognition | one recording | per-segment type, label, confidence, start and end; a header with duration, phoneme count, speech rate and articulation rate |
+| Alignment | one session | 8 scores: canonical and produced phoneme counts, correct, substitutions, omissions, insertions, accuracy, error rate |
+| DDK analysis | one trial | rate, ISI mean, ISI CV and InstRate CV, each three ways (`Whole_`, `Best3s_`, `Pierce9_`): 12 core measures per trial, 22 measurement columns with the syllable counts, durations and onsets. Per session: rate and ISI CV means for each cue, plus AMR. |
+
+Four of the 60 shared acoustic metrics (`cpps_iqr_db`, `hnr_iqr_db`,
+`jitter_iqr`, `shimmer_iqr`) are window-to-window dispersions. Only the
+sustained path measures in windows, so they are always empty on reading files.
+The full list, grouped by what each metric describes, is in
+[`METRICS.md`](METRICS.md).
 
 ---
 
@@ -98,7 +116,7 @@ Then check the install:
 python -m speechkit env
 ```
 
-That prints your Python version and, for each of the three stages, whether its
+That prints your Python version and, for each stage, whether its
 dependencies are present and which are missing. The interface shows the same
 thing as chips along the top.
 
@@ -111,12 +129,13 @@ deep-learning framework to use the acoustic measures:
 pip install -e ".[acoustics]"   # Praat measures only
 pip install -e ".[phonemes]"    # phoneme recognition only
 pip install -e ".[ddk]"         # DDK analysis only
+pip install -e ".[ddk-mat73]"   # adds h5py, for MATLAB -v7.3 .mat trials
 pip install -e ".[all]"         # everything
 ```
 
 The alignment stage needs nothing beyond the standard library. The DDK stage
-reads MATLAB `.mat` trials with SciPy; files saved with `-v7.3` also need
-`pip install h5py`.
+reads the metadata sheet with pandas and openpyxl and MATLAB `.mat` trials with
+SciPy; `.mat` files saved with `-v7.3` also need h5py (the `ddk-mat73` extra).
 
 ---
 
@@ -250,6 +269,22 @@ Metadata columns if yours differ). A session is one date and audio number;
 as `.wav` or `.mat`. Any extra column that is constant within a session, such as
 age or group, can be used as a factor in the statistics.
 
+**Cue labels.** Every listed trial is analysed and appears on the Trials sheet,
+but the Sessions sheet and the statistics only know the cues in the list of
+cues: `pataka`, `tatata`, `papapa` and `kakaka` by default, compared ignoring
+case. A trial labelled `pa` or `/ta/` is measured and then left out of both.
+Either use those labels in the sheet or change the list under the DDK settings.
+AMR is the mean of the `tatata`, `papapa` and `kakaka` means; `pataka` is not
+part of it.
+
+**Statistics.** By default they run on one measure, `Pierce9_DDK_Rate`, the one
+the paper reports, and compare Stim `OFF` with `ON`. The unit is one value per
+session and cue: the first valid trial, which for `Pierce9_` measures means one
+that meets the paper's inclusion criteria (at least ten syllables and four
+seconds of repetition), with values outside
+1.5 x IQR removed before the tests. Any Trials column can be added to the list of
+statistics measures, and any session-level metadata column can be a factor.
+
 Nothing is analysed without being listed, and nothing listed goes missing
 quietly: `DDK_file_check_<subject>.xlsx` reports files listed but not found
 (with the likely cause, such as a typo or a missing day folder), audio present
@@ -259,6 +294,8 @@ duplicates, and problems inside the sheet with their Excel row number.
 **Peak parameters.** The four `findpeaks` values (minimum distance, height,
 prominence, and the envelope smoothing window) apply to every subject unless
 the per-subject table overrides them, e.g. `{"S04": [0.12, 0.10, 0.15, 0.10]}`.
+The defaults are `0.12, 0.10, 0.10, 0.10`. A subject ID also matches a single
+longer key that ends with it, so `S04` finds `PD_S04`.
 Those per-subject values are study data, so keep them in a saved preset rather
 than in the code.
 
@@ -344,11 +381,16 @@ subject folder):
 
 | File | Contents |
 |---|---|
-| `DDK_results_<subject>.xlsx` | every result, one sheet per table: Info (run summary and every setting used), Trials (one row per trial, the three analyses side by side as `Whole_`, `Best3s_` and `Pierce9_` columns), Sessions (per-session cue means and AMR), and the statistics sheets |
+| `DDK_results_<subject>.xlsx` | every result, one sheet per table: Info (run summary, column legend and every setting used), Trials (one row per trial, the three analyses side by side as `Whole_`, `Best3s_` and `Pierce9_` columns), Sessions (per session and cue: mean rate and ISI CV of each analysis, plus an AMR row), and the statistics sheets Table3, ANOVA, Levene, Normality and Descriptives |
 | `DDK_file_check_<subject>.xlsx` | missing, unreadable, unlisted, misplaced and duplicate audio, and metadata problems |
-| `best3s segments/`, `pierce9 segments/` | one WAV per trial of the portion each analysis selected |
+| `best3s segments/`, `pierce9 segments/` | on by default, one WAV per trial of the portion each analysis selected |
 | `DDK_plots_<subject>.pdf` | optional, a diagnostic page per trial |
-| `reliability/` | optional, a random sample of sessions to re-measure by hand |
+| `reliability/` | optional, a random sample of sessions to re-measure by hand; the filled-in sheet adds Reliability_ICC and Reliability_trials to the workbook |
+| `DDK_mat/` and per-session CSVs | optional, for the original MATLAB scripts |
+
+The `Best3s_` and `Pierce9_` prefixes, and the segment folder names, follow the
+settings: a 4-second window gives `Best4s_`, the `first` criterion gives
+`First3s_`, and twelve Pierce syllables give `Pierce12_`.
 
 ---
 
@@ -461,6 +503,9 @@ line with `-o` pointing at a TSV folder, and review in the morning.
 single `.xlsx`, `.xls` or `.csv` directly in the subject folder. If there are
 several, choose the right one under Metadata sheet.
 
+**A DDK cue is missing from the Sessions sheet or the statistics.** Its
+`CueLabel` is not in the list of cues. See Cue labels under DDK analysis.
+
 **A DDK trial is listed but not analysed.** Open `DDK_file_check_<subject>.xlsx`.
 Every listed file that was not found is there with its Excel row and the likely
 cause, including near-identical file names that point to a typo.
@@ -474,11 +519,14 @@ filesystem. That is appropriate for a tool running on your own machine and
 unacceptable on a shared network interface, so it binds to `127.0.0.1` by
 default. Do not change that unless you know what you are doing.
 
-`.gitignore` refuses `*.wav`, `*.tsv`, `*.TextGrid` and calibration JSON so that
-participant recordings and derived data cannot be committed by accident. If you
-fork this for your own study, check `git status` before your first push, and
-remember that absolute paths saved in settings can themselves identify a study
-or a participant.
+`.gitignore` refuses recordings (`*.wav`, `*.mat`), phoneme and alignment files
+(`*.tsv`, `*.TextGrid`, `*_all_aligned.txt`), the acoustic CSVs, plots and pitch
+calibration JSON, and the DDK metadata sheets (`ddk_*.xlsx`, `.xls`, `.csv`) and
+results, so that participant recordings and derived data cannot be committed by
+accident. The patterns follow the default file names: if you rename an output
+or a metadata sheet, check that it is still covered. If you fork this for your
+own study, check `git status` before your first push, and remember that absolute
+paths saved in settings can themselves identify a study or a participant.
 
 ---
 
@@ -536,8 +584,9 @@ is enough; the button and the BibTeX below stay in step with it.
 ```bibtex
 @software{speechkit,
   author    = {Luca Pivetti},
-  title     = {speechkit: acoustic analysis, phoneme recognition and
-               phoneme-to-text alignment for speech recordings},
+  title     = {speechkit: acoustic analysis, phoneme recognition,
+               phoneme-to-text alignment and diadochokinetic analysis
+               for speech recordings},
   year      = {2026},
   version   = {1.1.0},
   doi       = {10.5281/zenodo.22775433},
@@ -577,3 +626,8 @@ downloaded at runtime rather than included here.
 Issues and pull requests are welcome, particularly reports of what happens on
 speech types and languages this has not been tried on. If you add a setting,
 add it to `speechkit/settings.py` and the interface will pick it up.
+
+If you add or remove an acoustic metric, update the matching `_M_*` list in
+`speechkit/acoustics.py`, the `assert` on `len(CANONICAL_METRICS)` below it,
+and [`METRICS.md`](METRICS.md). The assert is there so a changed count cannot
+go unnoticed; the document is there so readers know what the columns are.

@@ -7,8 +7,38 @@ dist/
 *.egg-info/
 
 # Never commit recordings or analysis output: they are participant data.
+
+# Recordings
 *.wav
+*.mat
+
+# Phoneme recognition and alignment
 *.tsv
 *.TextGrid
-pitch_calibration.json
 *_all_aligned.txt
+
+# Acoustic analysis output
+*_all_metrics.csv
+*_long.csv
+*_by_session.csv
+*_overview.png
+*_plots/
+plots_per_stim/
+pitch_calibration.json
+*_pitch_range.json
+
+# DDK analysis: metadata sheets and everything the stage writes
+ddk_*.xlsx
+ddk_*.xls
+ddk_*.csv
+DDK_results/
+DDK_results_*.xlsx
+DDK_file_check_*.xlsx
+DDK_plots_*.pdf
+DDK_mat/
+reliability/
+
+# Exception: demo/ is example data shipped on purpose, so none of the rules
+# above apply to it. Keep this block LAST: in .gitignore the last matching
+# pattern wins, and the negation must also re-include the folders.
+!demo/**
