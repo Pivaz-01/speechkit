@@ -11,52 +11,69 @@ code, the code is right and this file needs updating.
 
 | Stage | Unit | Count |
 |---|---|---|
-| Acoustic analysis | one recording | 103 metrics (60 shared + 21 reading-only + 22 sustained-only), plus 73 audit columns |
+| Acoustic analysis | one recording | 105 metrics (51 shared + 28 reading-only + 26 sustained-only), plus 73 audit columns |
 | Phoneme recognition | one recording | 4 header values, 5 fields per segment |
 | Alignment | one session | 8 scores |
-| DDK analysis | one trial | 12 core measures (4 measures x 3 analyses), 22 measurement columns in all; per session, 6 means for each cue plus AMR |
+| DDK analysis | one trial | 12 core measures (4 measures x 3 analyses) + 3 within-trial trend measures, 25 measurement columns in all; per session, 6 means for each cue plus AMR |
 
 ## Acoustic analysis
 
-The recording type decides which block a file fills. Every file gets the 60
-shared metrics plus the block for its own task, so a reading file carries
-81 metrics and a sustained-vowel file 82. The other task's block is left blank
-on purpose: an empty cell there means "does not apply", not "failed".
+The recording type decides which block a file fills. Every file gets the
+51 shared metrics plus the block for its own task, so a reading file carries
+79 metrics and a sustained-vowel file 77. The other task's block is left blank on
+purpose: an empty cell there means "does not apply", not "failed".
 
-`acoustics.py` asserts at import that the set is exactly 103 and that no name
-is repeated, so a change to the lists that is not reflected in that assert
-stops the module from loading.
+`acoustics.py` asserts at import that the set is exactly 105, split
+51 / 28 / 26, with no name repeated, so a change to the lists that is not
+reflected in those asserts stops the module from loading.
+
+"Shared" means the column is measured and meaningful on both tasks. It does not
+mean the number can be compared ACROSS tasks: the SD of F0 is prosody on a
+passage and stability on a held vowel. Compare a metric within one task only.
 
 
-### Shared by both tasks (60)
+### Shared by both tasks (51)
 
 | Group | n | Metrics |
 |---|---|---|
 | Durations | 4 | `duration_total_s`, `duration_speech_s`, `articulation_time_s`, `phonation_time_s` |
 | Intensity | 5 | `intensity_active_mean_db`, `intensity_active_std_db`, `intensity_nucleus_std_db`, `intensity_range_db`, `intensity_decay_db` |
 | Pitch | 10 | `pitch_mean_hz`, `pitch_median_hz`, `pitch_std_hz`, `pitch_min_hz`, `pitch_max_hz`, `pitch_range_hz`, `pitch_range_semitones`, `pitch_cv`, `voiced_percent`, `unvoiced_percent` |
-| Voice quality, periodicity-free or robust | 10 | `cpps_db`, `cpps_iqr_db`\*, `cpp_db`, `hnr_db`, `hnr_iqr_db`\*, `hnr_median_perinterval_db`, `nhr`, `mean_autocorrelation`, `voice_breaks_count`, `voice_breaks_degree_percent` |
-| Voice quality, cycle-to-cycle perturbation | 7 | `jitter_local_percent`, `jitter_ppq5_percent`, `jitter_iqr`\*, `shimmer_local_db`, `shimmer_apq11_percent`, `shimmer_iqr`\*, `num_pulses` |
+| Voice quality, robust | 8 | `cpps_db`, `cpp_db`, `hnr_db`, `hnr_median_perinterval_db`, `nhr`, `mean_autocorrelation`, `voice_breaks_count`, `voice_breaks_degree_percent` |
+| Voice quality, cycle-to-cycle perturbation\* | 5 | `jitter_local_percent`, `jitter_ppq5_percent`, `shimmer_local_db`, `shimmer_apq11_percent`, `num_pulses` |
 | Spectral shape | 7 | `spectral_centroid_hz`, `spectral_spread_hz`, `spectral_skewness`, `spectral_kurtosis`, `spectral_tilt_db_per_khz`, `alpha_ratio_db`, `hammarberg_index` |
 | Formants | 6 | `f1_mean_hz`, `f1_std_hz`, `f2_mean_hz`, `f2_std_hz`, `f3_mean_hz`, `f3_std_hz` |
 | Pitch-tracking stability | 3 | `voiced_fraction`, `f0_subharmonic_lock`, `f0_lock_semitones` |
-| Pauses | 5 | `pause_count`, `pauses_per_minute`, `pause_total_duration_s`, `pause_mean_duration_s`, `pause_ratio_to_speech` |
 | Recording quality | 3 | `rec_quality_score`, `rec_snr_db`, `rec_clipping_fraction` |
 
-\* Window-to-window dispersions. Only the sustained path measures in windows,
-so these four are always empty on reading files. They stay in the shared block
-so the CSV keeps one fixed shape. In practice, a reading file has 56 values
-that can be filled from this block, a sustained file 60.
+\* Measured on both tasks, but only interpretable on stable phonation. On a
+reading passage, consonant transitions, voice onsets and intonation contaminate
+cycle-to-cycle perturbation, and Praat counts every voiceless consonant as a
+voice break. These columns are in the reading CSV for completeness but are not
+plotted for reading; use CPPS and the spectral measures there instead.
 
-### Reading passages only (21)
+### Reading passages only (28)
 
 | Group | n | Metrics |
 |---|---|---|
+| Prosody and loudness decay | 2 | `pitch_std_semitones`, `intensity_decay_db_per_s` |
 | Rate | 4 | `speech_rate_syll_per_s`, `articulation_rate_syll_per_s`, `syllable_count_used`, `speaking_time_fraction` |
 | Fillers | 4 | `filler_count`, `fillers_per_minute`, `filler_total_duration_s`, `filler_ratio_to_speech` |
 | Rhythm and envelope modulation | 4 | `ems_3_8hz_ratio`, `ems_peak_freq_hz`, `ems_syllabic_to_slow_ratio`, `npvi` |
 | Vowel space | 3 | `vowel_space_area`, `vowel_dispersion_logarea`, `vowel_cloud_spread_hz` |
 | Fluency index | 6 | `fluency_intensity_stability`, `fluency_pitch_stability`, `fluency_rhythm_regularity`, `fluency_voice_quality`, `fluency_articulation`, `fluency_overall` |
+| Pauses | 5 | `pause_count`, `pauses_per_minute`, `pause_total_duration_s`, `pause_mean_duration_s`, `pause_ratio_to_speech` |
+
+`pitch_std_semitones` is the monopitch measure to compare between speakers:
+unlike `pitch_std_hz` it does not scale with F0 level, and so not with sex.
+`intensity_decay_db_per_s` is loudness decay per second of reading; prefer it to
+`intensity_decay_db` (dB across the whole passage) whenever reading speed
+differs between conditions, because a slower reading lasts longer and the
+whole-passage figure then mixes hypophonia with rate.
+
+The five pause columns describe hesitation pauses. On a sustained file the
+silences are the gaps between trials, a property of the recording protocol
+(see `sv_n_tokens`), so they are reading-only.
 
 The six `fluency_*` columns are an unvalidated composite with hand-chosen
 weights. The index is off by default (`enable_fluency_index=False`) and should
@@ -66,10 +83,11 @@ not be read as a severity rating.
 the passage syllable count is right for your wording. `speaking_time_fraction`
 does not depend on it.
 
-### Sustained vowels only (22)
+### Sustained vowels only (26)
 
 | Group | n | Metrics |
 |---|---|---|
+| Window-to-window dispersion | 4 | `cpps_iqr_db`, `hnr_iqr_db`, `jitter_iqr`, `shimmer_iqr` |
 | Maximum phonation time and tokens | 5 | `sv_mpt_longest_s`, `sv_mpt_longest_uninterrupted_s`, `sv_mpt_mean_s`, `sv_total_phonation_s`, `sv_n_tokens` |
 | Steady-state pitch and loudness | 3 | `sv_f0_sd_semitones`, `sv_f0_drift_st_per_s`, `sv_intensity_sd_db` |
 | Tremor | 2 | `sv_tremor_rate_hz`, `sv_tremor_extent_st` |
@@ -79,6 +97,10 @@ does not depend on it.
 | Coverage: how much of the vowel was measured | 4 | `sv_analyzed_fraction`, `sv_window_yield_s`, `sv_steady_frame_fraction`, `sv_longest_steady_run_s` |
 | Articulatory steadiness | 1 | `sv_f1f2_cloud_spread_hz` |
 | Reproducibility across tokens | 3 | `sv_jitter_sd_across_tokens`, `sv_shimmer_sd_across_tokens`, `sv_hnr_sd_across_tokens` |
+
+The four dispersion columns are the IQR across the steady-state windows of
+CPPS, HNR, jitter and shimmer. A difference between conditions smaller than
+that IQR is placement noise, not a change in the voice.
 
 ### Audit columns (73)
 
@@ -143,11 +165,29 @@ measures use the ten voicing onsets, so `Pierce9_ISI_mean_ms` is the duration
 divided by 9. With `peaks` they use the envelope peaks of the same syllables,
 the same definition as `Whole_` and `Best3s_`.
 
-### All measurement columns on the Trials sheet (22)
+### Within-trial trends (3, whole trial only)
+
+The core measures describe a trial as a whole. They cannot show a speaker who
+speeds up during the trial (oral festination, a hypokinetic sign) or whose
+syllables fade. These three can. They are computed on the whole trial only: a
+3-s window or nine syllables are too short for a trend. Each needs at least 5
+points (`MIN_TREND_POINTS`), otherwise it is empty.
+
+| Column | Definition |
+|---|---|
+| `Whole_InstRate_Slope` | least-squares slope of the local 3-syllable rate over time, syll/s per s; > 0 = accelerating |
+| `Whole_PeakAmp_CV` | SD / mean of the syllable peak amplitudes |
+| `Whole_PeakAmp_Trend_pct_s` | slope of the peak amplitudes over time, as % of their mean per second; < 0 = syllables getting weaker |
+
+The envelope is normalised to each trial's maximum, so the amplitude measures
+are relative. Absolute peak heights are not comparable between trials, and
+the two amplitude columns do not depend on recording level.
+
+### All measurement columns on the Trials sheet (25)
 
 | Analysis | n | Columns |
 |---|---|---|
-| Whole trial | 8 | `Whole_SyllableCount`, `Whole_DDK_Rate`, `Whole_ActiveDurationSec`, `Whole_SpeechStartSec`, `Whole_SpeechEndSec`, `Whole_ISI_mean_ms`, `Whole_ISI_CV`, `Whole_InstRate_CV` |
+| Whole trial | 11 | `Whole_SyllableCount`, `Whole_DDK_Rate`, `Whole_ActiveDurationSec`, `Whole_SpeechStartSec`, `Whole_SpeechEndSec`, `Whole_ISI_mean_ms`, `Whole_ISI_CV`, `Whole_InstRate_CV`, `Whole_InstRate_Slope`, `Whole_PeakAmp_CV`, `Whole_PeakAmp_Trend_pct_s` |
 | Best window | 7 | `Best3s_WindowStartSec`, `Best3s_WindowEndSec`, `Best3s_SyllableCount`, `Best3s_DDK_Rate`, `Best3s_ISI_mean_ms`, `Best3s_ISI_CV`, `Best3s_InstRate_CV` |
 | Pierce | 7 | `Pierce9_Onset1Sec`, `Pierce9_Onset10Sec`, `Pierce9_DurationSec`, `Pierce9_DDK_Rate`, `Pierce9_ISI_mean_ms`, `Pierce9_ISI_CV`, `Pierce9_InstRate_CV` |
 
@@ -183,7 +223,8 @@ nor the statistics.
 ### Statistics
 
 They run on the measures in `DDK_STATS_METRICS`, by default only
-`Pierce9_DDK_Rate`. The unit is one value per session and cue: the first valid
+`Pierce9_DDK_Rate`. Any Trials column can be added, including the three trend
+measures. The unit is one value per session and cue: the first valid
 trial (`DDK_TRIAL_AGG = first`); for `Pierce9_` measures a trial is valid only
 when `Pierce9_Included` is true. By default only Stim `OFF` and `ON` sessions
 are kept, and values outside 1.5 x IQR are removed before the tests.

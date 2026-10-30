@@ -19,10 +19,8 @@ pitch_cv,around,natural read-speech F0 CV is moderate; very low = monotone,0.012
 voiced_percent,higher,more voicing = more continuous phonation (within reason),92.9891
 unvoiced_percent,lower,less unvoiced = more continuous phonation,7.01087
 cpps_db,higher,"higher CPPS = clearer, less dysphonic voice (robust severity correlate)",19.8127
-cpps_iqr_db,lower,window-to-window IQR of CPPS; lower = more repeatable estimate,0.997959
 cpp_db,higher,"higher CPP = clearer, less breathy voice",18.7002
 hnr_db,higher,"higher = clearer, less noisy voice",22.366
-hnr_iqr_db,lower,window-to-window IQR of HNR; lower = more repeatable estimate,1.11425
 hnr_median_perinterval_db,higher,higher = clearer voice (robust median complement to HNR),19.4708
 nhr,lower,lower noise-to-harmonics = clearer voice,0.00580139
 mean_autocorrelation,higher,higher = more periodic/clean phonation,0.992563
@@ -30,10 +28,8 @@ voice_breaks_count,lower,fewer genuine phonation breaks = steadier voice,0
 voice_breaks_degree_percent,lower,less time in breaks = steadier voice,0
 jitter_local_percent,lower,lower = more stable pitch periods,0.359958
 jitter_ppq5_percent,lower,lower = more stable pitch periods,0.214263
-jitter_iqr,lower,"window-to-window IQR of jitter; if it approaches the jitter value, the median is not usable",0.0647313
 shimmer_local_db,lower,lower = more stable amplitude,0.20046
 shimmer_apq11_percent,lower,lower = more stable amplitude,1.75875
-shimmer_iqr,lower,"window-to-window IQR of shimmer; if it approaches the shimmer value, the median is not usable",0.343349
 num_pulses,neutral,depends on voiced duration; sanity-check only,17512
 spectral_centroid_hz,neutral,timbre/brightness; speaker & content dependent,1558.59
 spectral_spread_hz,neutral,spectral width; context only,2941.39
@@ -51,14 +47,11 @@ f3_std_hz,lower,lower = more stable articulation,119.438
 voiced_fraction,higher,"fraction of frames the tracker calls voiced; always computable, so it still separates files when jitter/shimmer cannot be measured",0.929891
 f0_subharmonic_lock,lower,1 = a free tracker falls to F0/2 on this file: period doubling / diplophonia present,0
 f0_lock_semitones,lower,"in-range F0 minus unconstrained F0, in semitones; ~12 = full octave lock, ~0 = clean periodicity",-0.00168702
-pause_count,neutral,"breath gaps BETWEEN tokens = trial count - 1; structural, not a fluency measure",1
-pauses_per_minute,neutral,"breath-gap rate; depends on how many trials were recorded, not on the voice",3.35365
-pause_total_duration_s,neutral,"total inter-trial silence; recording protocol, not a fluency measure",1.11456
-pause_mean_duration_s,neutral,mean inter-trial breath pause; context only,1.11456
-pause_ratio_to_speech,neutral,inter-trial silence relative to phonation; context only,0.066436
 rec_quality_score,higher,"higher = better recording (about the signal, not the voice)",99.9977
 rec_snr_db,higher,higher SNR = cleaner recording,27.118
 rec_clipping_fraction,lower,lower = less clipping = cleaner recording,1.13292e-06
+pitch_std_semitones,around,"F0 SD in semitones over the passage; LOW = monopitch (hypokinetic), very high = check for tracking errors",
+intensity_decay_db_per_s,around,"dB per second of reading; near 0 = steady loudness, negative = loudness decay, independent of reading speed",
 speech_rate_syll_per_s,around,typical read speech mid range; much slower may indicate impairment,
 articulation_rate_syll_per_s,around,typical mid range; very slow may indicate impairment,
 syllable_count_used,neutral,syllables used for rate (exact if known passage),
@@ -80,6 +73,15 @@ fluency_rhythm_regularity,higher,higher = more typical rhythm (indicative),
 fluency_voice_quality,higher,higher = cleaner voice (indicative),
 fluency_articulation,higher,higher = more typical rate (indicative),
 fluency_overall,higher,"higher = more fluent overall (INDICATIVE only, not validated)",
+pause_count,neutral,"breath gaps BETWEEN tokens = trial count - 1; structural, not a fluency measure",
+pauses_per_minute,neutral,"breath-gap rate; depends on how many trials were recorded, not on the voice",
+pause_total_duration_s,neutral,"total inter-trial silence; recording protocol, not a fluency measure",
+pause_mean_duration_s,neutral,mean inter-trial breath pause; context only,
+pause_ratio_to_speech,neutral,inter-trial silence relative to phonation; context only,
+cpps_iqr_db,lower,window-to-window IQR of CPPS; lower = more repeatable estimate,0.997959
+hnr_iqr_db,lower,window-to-window IQR of HNR; lower = more repeatable estimate,1.11425
+jitter_iqr,lower,"window-to-window IQR of jitter; if it approaches the jitter value, the median is not usable",0.0647313
+shimmer_iqr,lower,"window-to-window IQR of shimmer; if it approaches the shimmer value, the median is not usable",0.343349
 sv_mpt_longest_s,higher,maximum phonation time: longer = better respiratory/phonatory support,17.891
 sv_mpt_longest_uninterrupted_s,higher,"longest stretch of CONTINUOUS PHONATION inside a single token, with no break (>=50 ms below the phonation threshold or unvoiced) in the middle. Cannot exceed sv_mpt_longest_s; the gap between the two is how much of the best token was actually held. Read it with sv_n_breaks_in_best_token and sv_unbroken_energy_only_s in the audit block.",16.6122
 sv_mpt_mean_s,higher,mean token duration; longer = better sustained support,17.891

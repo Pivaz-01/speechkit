@@ -1,4 +1,123 @@
-# Changelog — acoustic analysis module
+# Changelog
+
+Package releases first, newest on top. The acoustic analysis module keeps its
+own internal numbering (v8 to v21), continued from the original script; its
+history up to v20 is the original changelog from the head of `praat_v10.py`,
+reproduced unedited at the bottom of this file.
+
+## speechkit 1.2.0
+
+### Acoustic analysis (module v21)
+
+```text
+-----------------------------------------------------------------------------
+v21 changelog - "BOTH" MEANS BOTH, two reading measures exported, DDK kept out.
+
+CANONICAL_METRICS is 105 (was 103). The split is now 51 shared / 28 reading-only
+/ 26 sustained-only (was 60 / 21 / 22), so a reading file carries 79 metrics and
+a sustained file 77 (were 81 / 82). Asserted at import, total and split.
+AUDIT_COLUMNS is unchanged at 73.
+
+ 1. NINE COLUMNS LEFT METRICS_BOTH. They were shared in the code, not in any
+    clinical sense:
+      - cpps_iqr_db, hnr_iqr_db, jitter_iqr, shimmer_iqr are window-to-window
+        dispersions. Only the sustained path measures in windows, so they were
+        structurally blank on every reading file (v19 item 9 already said so).
+        -> sustained-only.
+      - pause_count, pauses_per_minute, pause_total_duration_s,
+        pause_mean_duration_s, pause_ratio_to_speech are hesitation pauses on
+        connected speech, but on a sustained file they are the gaps BETWEEN
+        TRIALS (pause_count = trials - 1). v16 item 6 relabelled them "neutral"
+        there; a filled "pause" column on a phonation file still invites reading
+        it as fluency, and sv_n_tokens already carries the trial count.
+        -> reading-only, blank on sustained files.
+    The TASK_DIRECTION_OVERRIDES entries for the pause block are kept: they
+    still guard the generic names when a mixed batch is plotted.
+
+ 2. pitch_std_semitones EXPORTED (reading). The SD of the semitone contour,
+    computed correctly since v20 item 2 but never written to the CSV. It is the
+    standard monopitch measure: pitch_std_hz scales with F0 level, and so with
+    sex, semitones do not. Replaces pitch_cv in the reading overview grid. The
+    sustained equivalent remains sv_f0_sd_semitones, from the steady windows.
+
+ 3. intensity_decay_db_per_s EXPORTED (reading). Computed since v19 item 5, but
+    only the sustained twin was exported. The passage is fixed, its DURATION is
+    not: a slow or OFF-condition reader takes longer, so dB across the passage
+    mixes hypophonia with reading speed in exactly the comparison the study
+    makes. intensity_decay_db keeps its definition for continuity; the per-second
+    value replaces it in the reading overview grid.
+
+ 4. PERTURBATION NO LONGER PLOTTED FOR READING. jitter_local_percent,
+    jitter_ppq5_percent, shimmer_local_db, shimmer_apq11_percent, nhr and
+    voice_breaks_degree_percent left CORE_METRICS_READING. Cycle-to-cycle
+    perturbation is only interpretable on stable phonation; on connected speech
+    consonant transitions, onsets/offsets and intonation contaminate it, and
+    Praat counts every voiceless consonant as a voice break. A bar plot makes a
+    number look authoritative. The columns stay in the CSV.
+
+ 5. DDK TRIALS ARE KEPT OUT OF THE ACOUSTIC PIPELINE. The router has two
+    classes and falls back to reading, and a /pataka/ trial - pauses between
+    syllables, strong 3-8 Hz modulation - passes as connected speech without a
+    warning, producing a speech rate, a pause count and a fluency profile for a
+    motor task. looks_like_ddk() flags a file whose stem or IMMEDIATE parent
+    folder contains ddk / amr / smr / pataka / papapa / tatata / kakaka as a
+    word, or a word starting with diadoch / diadok. Higher folders are not
+    checked, so a study folder called DDK_project cannot flag every file below
+    it. With task="auto" flagged files are skipped, before pitch calibration so
+    they cannot move the batch range; with a forced task they are analysed and
+    a warning says why that is not meaningful.
+
+ 6. Housekeeping: stale "97 canonical metrics" in docstrings and comments
+    corrected.
+
+VERIFIED: module-level asserts pass with stubbed audio libraries; every
+canonical metric is produced by _raw_metric_table and has a METRIC_DIRECTION
+entry; every CORE / OVERVIEW reading metric is canonical; looks_like_ddk on 8
+cases including the false positives "amrita" and a DDK_project parent path.
+
+NOT VERIFIED: no run on real audio (librosa and parselmouth unavailable in the
+build environment). Re-run the demo reading and sustained files: the reading CSV
+must gain pitch_std_semitones and intensity_decay_db_per_s with plausible
+values, the pause block must be blank on the sustained file, and no other
+number may change.
+```
+
+### DDK analysis
+
+Three within-trial trend measures on the whole trial, in the Trials sheet, the
+Info legend, the per-session CSVs and the MATLAB export. The core measures
+describe a trial as a whole and cannot show a speaker who accelerates (oral
+festination) or whose syllables fade.
+
+- `Whole_InstRate_Slope`: least-squares slope of the local 3-syllable rate over
+  time, syll/s per s; > 0 = accelerating.
+- `Whole_PeakAmp_CV`: SD / mean of the syllable peak amplitudes.
+- `Whole_PeakAmp_Trend_pct_s`: slope of the peak amplitudes over time, as % of
+  their mean per second; < 0 = syllables getting weaker.
+
+Each needs at least 5 points (`MIN_TREND_POINTS`), otherwise it is empty. The
+envelope is normalised per trial, so the amplitude measures are relative. Not
+computed for `Best3s_` and `Pierce9_`: three seconds or nine syllables are too
+short for a trend. No existing column changed. Verified on a synthetic trial
+with known acceleration and fading (slope 0.39 vs 0.40 expected, amplitude
+trend -12.2 %/s vs about -12 %/s expected).
+
+### Documentation and packaging
+
+- `METRICS.md` added: the full inventory of every stage, generated from the
+  metric lists in the code.
+- README, `CITATION.cff` and `pyproject.toml` at 1.2.0; build requirement raised
+  to `setuptools>=77`, the first version that accepts an SPDX license string.
+- `.gitignore` extended to the acoustic and DDK outputs, with an exception for
+  `demo/`.
+
+## speechkit 1.1.0
+
+- DDK analysis stage added (`speechkit.ddk`, `python -m speechkit ddk`): Python
+  port of `DDK_processing_06_03_26.m`, with the whole-trial, best-window and
+  Pierce, Cotton and Perry (2013) analyses and the statistics of that paper.
+
+## Acoustic analysis module, v8 to v20 (original changelog)
 
 This is the original changelog from the head of `praat_v10.py`, moved out of the
 source file so the module starts with code. Nothing in it has been edited.

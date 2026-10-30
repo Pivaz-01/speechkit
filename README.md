@@ -66,14 +66,20 @@ recording.
 
 | Stage | Unit | What comes out |
 |---|---|---|
-| Acoustic analysis | one recording | 103 metrics in total: 60 shared by both tasks, 21 reading-only, 22 sustained-only. A reading file carries 81, a sustained file 82; the other task's block is blank by design. Plus 73 audit columns, which are provenance, not metrics. |
+| Acoustic analysis | one recording | 105 metrics in total: 51 shared by both tasks, 28 reading-only, 26 sustained-only. A reading file carries 79, a sustained file 77; the other task's block is blank by design. Plus 73 audit columns, which are provenance, not metrics. |
 | Phoneme recognition | one recording | per-segment type, label, confidence, start and end; a header with duration, phoneme count, speech rate and articulation rate |
 | Alignment | one session | 8 scores: canonical and produced phoneme counts, correct, substitutions, omissions, insertions, accuracy, error rate |
-| DDK analysis | one trial | rate, ISI mean, ISI CV and InstRate CV, each three ways (`Whole_`, `Best3s_`, `Pierce9_`): 12 core measures per trial, 22 measurement columns with the syllable counts, durations and onsets. Per session: rate and ISI CV means for each cue, plus AMR. |
+| DDK analysis | one trial | rate, ISI mean, ISI CV and InstRate CV, each three ways (`Whole_`, `Best3s_`, `Pierce9_`): 12 core measures per trial, plus 3 within-trial trends on the whole trial (rate acceleration, syllable amplitude CV and fading): 25 measurement columns with the syllable counts, durations and onsets. Per session: rate and ISI CV means for each cue, plus AMR. |
 
-Four of the 60 shared acoustic metrics (`cpps_iqr_db`, `hnr_iqr_db`,
-`jitter_iqr`, `shimmer_iqr`) are window-to-window dispersions. Only the
-sustained path measures in windows, so they are always empty on reading files.
+Shared means measured on both tasks, not comparable across them:
+the SD of F0 is prosody on a passage and stability on a held vowel, so compare
+a metric within one task only. Jitter, shimmer, NHR and voice breaks are
+computed on reading files too but are only interpretable on stable phonation,
+so they are not plotted for reading; use CPPS and the spectral measures there.
+DDK recordings are not an acoustic task: in a mixed folder, files whose name or
+folder marks them as DDK (`ddk`, `pataka`, `amr`, `smr`, `diadoch...`) are
+skipped with a warning and belong in the DDK stage.
+
 The full list, grouped by what each metric describes, is in
 [`METRICS.md`](METRICS.md).
 
@@ -503,6 +509,14 @@ line with `-o` pointing at a TSV folder, and review in the morning.
 single `.xlsx`, `.xls` or `.csv` directly in the subject folder. If there are
 several, choose the right one under Metadata sheet.
 
+**Acoustic analysis skipped some files as DDK.** In a mixed folder, a file whose
+name or own folder contains `ddk`, `pataka`, `papapa`, `tatata`, `kakaka`,
+`amr`, `smr` or a word starting with `diadoch` is left out, because the
+reading/sustained router would otherwise analyse it as reading. Run those
+files through the DDK stage. If a file was caught by mistake, rename it, or
+force the task to `reading` or `sustained_vowel`: forced files are analysed,
+with a warning.
+
 **A DDK cue is missing from the Sessions sheet or the statistics.** Its
 `CueLabel` is not in the list of cues. See Cue labels under DDK analysis.
 
@@ -588,7 +602,7 @@ is enough; the button and the BibTeX below stay in step with it.
                phoneme-to-text alignment and diadochokinetic analysis
                for speech recordings},
   year      = {2026},
-  version   = {1.1.0},
+  version   = {1.2.0},
   doi       = {10.5281/zenodo.22775433},
   url       = {https://github.com/Pivaz-01/speechkit}
 }

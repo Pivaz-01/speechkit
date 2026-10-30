@@ -1,6 +1,7 @@
 """
-speechkit — acoustic analysis, phoneme recognition and phoneme-to-text
-alignment for speech recordings, behind one local interface.
+speechkit — acoustic analysis, phoneme recognition, phoneme-to-text
+alignment and diadochokinetic (DDK) analysis for speech recordings, behind one
+local interface.
 
 Four stages, each usable on its own:
 
@@ -21,7 +22,7 @@ import sys
 
 from . import _winsetup
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # Must run before torch, parselmouth or soundfile pull in native libraries.
 _winsetup.configure()

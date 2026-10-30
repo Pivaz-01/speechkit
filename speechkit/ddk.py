@@ -375,6 +375,40 @@ def interval_metrics(locs_sec, min_n_for_isi_cv=2):
     return out
 
 
+# v1.2: change WITHIN the trial. Mean rate and ISI CV describe a trial as a
+# whole and cannot show a speaker who accelerates (oral festination, a
+# hypokinetic sign) or whose syllables fade (articulatory force decay). Both
+# are measured on the whole trial only: a 3-s window or nine syllables are too
+# short for a trend. The envelope is normalised to each trial's maximum, so
+# the amplitude measures are RELATIVE (CV, % of mean per second); absolute
+# peak heights are not comparable between trials.
+MIN_TREND_POINTS = 5
+
+
+def _slope(x, y):
+    """Least-squares slope of y on x; NaN with too few points or no spread."""
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    ok = np.isfinite(x) & np.isfinite(y)
+    x, y = x[ok], y[ok]
+    if x.size < MIN_TREND_POINTS or np.ptp(x) <= 0:
+        return np.nan
+    return float(np.polyfit(x, y, 1)[0])
+
+
+def trend_metrics(locs_sec, pks, inst_rates, inst_times):
+    """InstRate_Slope (syll/s per s; > 0 = accelerating), PeakAmp_CV, and
+    PeakAmp_Trend_pct_s (peak amplitude change per second, % of the mean;
+    < 0 = syllables getting weaker)."""
+    pks = np.asarray(pks, float)
+    out = dict(InstRate_Slope=_slope(inst_times, inst_rates),
+               PeakAmp_CV=np.nan, PeakAmp_Trend_pct_s=np.nan)
+    if pks.size >= MIN_TREND_POINTS and pks.mean() > 0:
+        out["PeakAmp_CV"] = mstd(pks) / float(pks.mean())
+        sl = _slope(locs_sec, pks)
+        out["PeakAmp_Trend_pct_s"] = 100.0 * sl / float(pks.mean()) if np.isfinite(sl) else np.nan
+    return out
+
+
 def _window_cv(locs_sec, i0, i1):
     seg = locs_sec[i0:i1]
     if seg.size < 3:
@@ -768,7 +802,8 @@ def analyze_trial(job):
         whole = interval_metrics(locs_sec)
         res.update(SyllableCount=n, DDK_Rate=n / active, ActiveDurationSec=active,
                    SpeechStartSec=start, SpeechEndSec=end, ISI_mean_ms=whole["ISI_mean"],
-                   ISI_CV=whole["ISI_cv"], InstRate_CV=whole["instRate_cv"])
+                   ISI_CV=whole["ISI_cv"], InstRate_CV=whole["instRate_cv"],
+                   **trend_metrics(locs_sec, pks, whole["instRates"], whole["instTimes"]))
         t0, t1, wnote = select_window(locs_sec, start, end)
         res["best_note"] = note + wnote
         res["best"] = dict(WindowStartSec=t0, WindowEndSec=t1, **window_metrics(locs_sec, t0, t1))
@@ -795,6 +830,7 @@ def analyze_trial(job):
                       syllCount=float(n), ddkRate=n / active, activeDur=active,
                       speechStart=start, speechEnd=end, ISI_mean_ms=whole["ISI_mean"],
                       ISI_cv=whole["ISI_cv"], instRate_cv=whole["instRate_cv"],
+                      **{k[0].lower() + k[1:]: float(res[k]) for k in TREND_COLS},
                       params=dict(minPeakDistance=dist, minPeakHeight=height, minPeakProm=prom,
                                   smoothWindow=smooth, tripletWin=float(TRIPLET_WIN)),
                       bestWin=dict(criterion=BEST_WIN_CRITERION, winSec=BEST_WIN_SEC,
@@ -916,7 +952,9 @@ def save_plot(path, job, audio, fs, env, locs_sec, pks, res, whole, height):
 
 # ── Output tables ───────────────────────────────────────────────────────────
 DIGITS = dict(DDK_Rate=2, ActiveDurationSec=2, ISI_mean_ms=1, ISI_CV=3, InstRate_CV=3,
-              WindowStartSec=2, WindowEndSec=2, SpeechStartSec=2, SpeechEndSec=2)
+              WindowStartSec=2, WindowEndSec=2, SpeechStartSec=2, SpeechEndSec=2,
+              InstRate_Slope=3, PeakAmp_CV=3, PeakAmp_Trend_pct_s=2)
+TREND_COLS = ("InstRate_Slope", "PeakAmp_CV", "PeakAmp_Trend_pct_s")
 
 
 def _r(col, v):
@@ -942,7 +980,8 @@ def session_tables(results):
         whole_rows.append(dict(
             Filename=r["filename"], CueLabel=r["cue"], SyllableCount=r.get("SyllableCount"),
             **{c: _r(c, r.get(c, np.nan)) for c in
-               ("DDK_Rate", "ActiveDurationSec", "ISI_mean_ms", "ISI_CV", "InstRate_CV")},
+               ("DDK_Rate", "ActiveDurationSec", "ISI_mean_ms", "ISI_CV", "InstRate_CV")
+               + TREND_COLS},
             Notes=r["note"]))
         best_rows.append(dict(
             Filename=r["filename"], CueLabel=r["cue"],
@@ -974,7 +1013,7 @@ def master_rows(results):
                    SampleRate=r["fs"], FileDurationSec=mround(r["file_dur"], 2),
                    Whole_SyllableCount=r.get("SyllableCount"))
         for c in ("DDK_Rate", "ActiveDurationSec", "SpeechStartSec", "SpeechEndSec",
-                  "ISI_mean_ms", "ISI_CV", "InstRate_CV"):
+                  "ISI_mean_ms", "ISI_CV", "InstRate_CV") + TREND_COLS:
             row[f"Whole_{c}"] = _r(c, r.get(c, np.nan))
         for c in ("WindowStartSec", "WindowEndSec"):
             row[f"{WIN_LABEL}_{c}"] = _r(c, b.get(c, np.nan))
@@ -1771,6 +1810,11 @@ def _run(cfg, should_stop):
     info += [("section", "Column prefixes (Trials sheet)", None),
              ("row", "Whole_", "whole trial, method of DDK_processing_06_03_26.m (envelope peaks; "
                                "rate = syllables / active-speech duration)"),
+             ("row", "Whole_InstRate_Slope", "change of the local (3-syllable) rate over the trial, "
+                                             "syll/s per s; > 0 = accelerating (festination)"),
+             ("row", "Whole_PeakAmp_CV / _Trend_pct_s", "syllable peak amplitude: CV, and change "
+                                                       "per second as % of the mean (< 0 = fading); "
+                                                       "relative only, the envelope is normalised per trial"),
              ("row", f"{WIN_LABEL}_", f"{BEST_WIN_SEC:g}-s window chosen by '{BEST_WIN_CRITERION}' "
                                       "(rate = syllables in window / window length)"),
              ("row", f"{PIERCE_LABEL}_", f"Pierce, Cotton & Perry (2013): onset of glottal pulsing of "

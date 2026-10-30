@@ -183,6 +183,33 @@ def task_from_filename(file_path: str) -> Optional[str]:
     return _decide(stem) or _decide(parent)
 
 
+# v21: DDK recordings are not an acoustic-analysis task. /pataka/ has pauses
+# between syllables and strong 3-8 Hz modulation, so the two-class router below
+# sends it to the READING pipeline without complaint, and the CSV then holds a
+# speech rate, a pause count and a fluency profile for a motor task. They are
+# analysed by the DDK stage (speechkit.ddk) instead.
+_DDK_WORD_TOKENS = ("ddk", "amr", "smr", "pataka", "papapa", "tatata", "kakaka")
+_DDK_PREFIX_TOKENS = ("diadoch", "diadok")
+
+
+def looks_like_ddk(file_path: str) -> bool:
+    """
+    True when the file name or its own folder marks it as a diadochokinetic
+    trial. Only the stem and the IMMEDIATE parent folder are checked, so a study
+    folder higher up the path cannot flag every file below it. Word tokens must
+    stand alone ("amr" matches "P03_amr_1", not "amrita"); prefix tokens only
+    need to start a word ("diadoch" matches "diadochokinesis").
+    """
+    p = Path(file_path)
+    for text in (p.stem.lower(), p.parent.name.lower()):
+        for t in _DDK_WORD_TOKENS:
+            if re.search(r"(?<![a-z])" + re.escape(t) + r"(?![a-z])", text):
+                return True
+        if any(_token_present(t, text) for t in _DDK_PREFIX_TOKENS):
+            return True
+    return False
+
+
 def task_from_acoustics(voiced_fraction: float, ems_3_8hz_ratio: float,
                         centroid_cv: float) -> Tuple[str, str]:
     """
@@ -5767,17 +5794,37 @@ def expand_to_wav_files(paths: List[str], recursive: bool = True) -> List[str]:
 #    not be counted as metrics or drawn as bar plots. They now go to their own
 #    clearly separated block in the CSV.
 #
-# NOTE ON READING THE COUNT (corrected in v19): the union across tasks is 103.
-# Any single file emits the 60 both-task metrics plus the 22-column block for its
-# own task, so a sustained file carries 82 and a reading file 81; the other
-# task's block is blank by design. The old note said 73 and 78, which had not
-# been true since v16 moved the provenance columns into AUDIT_COLUMNS.
+# NOTE ON READING THE COUNT (v21): the union across tasks is 105.
+# Any single file emits the 51 both-task metrics plus the block for its own
+# task: 28 reading-only, 26 sustained-only. A reading file therefore carries 79
+# metrics and a sustained file 77; the other task's block is blank by design.
 #
-# FOUR OF THE 60 'BOTH' COLUMNS ARE SUSTAINED-ONLY IN PRACTICE: cpps_iqr_db,
-# hnr_iqr_db, jitter_iqr and shimmer_iqr are window-to-window dispersions, and
-# only the sustained path measures in windows. They are structurally blank on a
-# reading file. They stay in METRICS_BOTH so the CSV keeps one fixed shape, but
-# do not read an empty cell there as a failed measurement.
+# v21 - "BOTH" NOW MEANS BOTH. Until v20 nine columns sat in METRICS_BOTH that
+# were not shared in any clinical sense:
+#   * cpps_iqr_db, hnr_iqr_db, jitter_iqr, shimmer_iqr are window-to-window
+#     dispersions. Only the sustained path measures in windows, so they were
+#     structurally blank on every reading file. -> sustained-only.
+#   * the five pause columns are hesitation pauses on connected speech, but on a
+#     sustained file they are the gaps BETWEEN TRIALS (pause_count = trials - 1),
+#     a property of the recording protocol already carried by sv_n_tokens. A
+#     filled "pause" column on a phonation file invites reading it as fluency.
+#     -> reading-only, blank on sustained files.
+# Two reading measures that the analyser already computed are now exported:
+#   * pitch_std_semitones - F0 SD of the semitone contour, the standard monopitch
+#     measure. pitch_std_hz scales with F0 level (and so with sex); semitones do
+#     not, so this is the one to compare between speakers.
+#   * intensity_decay_db_per_s - loudness decay per second of reading. The
+#     passage is fixed but its DURATION is not: a slow or OFF-condition reader
+#     takes longer, and dB across the passage then mixes hypophonia with reading
+#     speed. intensity_decay_db is kept for continuity.
+#
+# NOT EVERY 'BOTH' COLUMN IS EQUALLY VALID ON BOTH TASKS. jitter, shimmer, NHR
+# and voice breaks are computed on reading files too, but cycle-to-cycle
+# perturbation is only interpretable on stable phonation; on connected speech it
+# is contaminated by consonant transitions, onsets/offsets and intonation. They
+# stay in the CSV for completeness and are kept OUT of the reading plots
+# (CORE_METRICS_READING). CPPS and the spectral measures are the voice-quality
+# measures to use on reading.
 
 _M_BOTH_CONTEXT = [
     "duration_total_s", "duration_speech_s", "articulation_time_s", "phonation_time_s",
@@ -5792,13 +5839,13 @@ _M_BOTH_PITCH = [
     "voiced_percent", "unvoiced_percent",
 ]
 _M_BOTH_VQ_ROBUST = [
-    "cpps_db", "cpps_iqr_db", "cpp_db",
-    "hnr_db", "hnr_iqr_db", "hnr_median_perinterval_db", "nhr", "mean_autocorrelation",
+    "cpps_db", "cpp_db",
+    "hnr_db", "hnr_median_perinterval_db", "nhr", "mean_autocorrelation",
     "voice_breaks_count", "voice_breaks_degree_percent",
 ]
 _M_BOTH_VQ_PERTURB = [
-    "jitter_local_percent", "jitter_ppq5_percent", "jitter_iqr",
-    "shimmer_local_db", "shimmer_apq11_percent", "shimmer_iqr",
+    "jitter_local_percent", "jitter_ppq5_percent",
+    "shimmer_local_db", "shimmer_apq11_percent",
     "num_pulses",
 ]
 _M_BOTH_SPECTRAL = [
@@ -5812,7 +5859,9 @@ _M_BOTH_FORMANT = [
 _M_BOTH_STABILITY = [
     "voiced_fraction", "f0_subharmonic_lock", "f0_lock_semitones",
 ]
-_M_BOTH_PAUSE = [
+# v21: reading-only (see the count note above); kept as its own list so the
+# grouping stays readable.
+_M_READING_PAUSE = [
     "pause_count", "pauses_per_minute", "pause_total_duration_s",
     "pause_mean_duration_s", "pause_ratio_to_speech",
 ]
@@ -5820,6 +5869,8 @@ _M_BOTH_REC = [
     "rec_quality_score", "rec_snr_db", "rec_clipping_fraction",
 ]
 _M_READING_ONLY = [
+    # v21: prosody and loudness decay, both computed before but not exported
+    "pitch_std_semitones", "intensity_decay_db_per_s",
     "speech_rate_syll_per_s", "articulation_rate_syll_per_s", "syllable_count_used",
     "speaking_time_fraction",
     "filler_count", "fillers_per_minute", "filler_total_duration_s",
@@ -5829,6 +5880,11 @@ _M_READING_ONLY = [
     "fluency_intensity_stability", "fluency_pitch_stability",
     "fluency_rhythm_regularity", "fluency_voice_quality", "fluency_articulation",
     "fluency_overall",
+]
+# v21: window-to-window dispersions, moved here from METRICS_BOTH. Only the
+# sustained path measures in windows; on reading files they were always blank.
+_M_SUSTAINED_DISPERSION = [
+    "cpps_iqr_db", "hnr_iqr_db", "jitter_iqr", "shimmer_iqr",
 ]
 _M_SUSTAINED_ONLY = [
     "sv_mpt_longest_s", "sv_mpt_longest_uninterrupted_s", "sv_mpt_mean_s",
@@ -5850,9 +5906,9 @@ _M_SUSTAINED_ONLY = [
 
 METRICS_BOTH = (_M_BOTH_CONTEXT + _M_BOTH_INTENSITY + _M_BOTH_PITCH
                 + _M_BOTH_VQ_ROBUST + _M_BOTH_VQ_PERTURB + _M_BOTH_SPECTRAL
-                + _M_BOTH_FORMANT + _M_BOTH_STABILITY + _M_BOTH_PAUSE + _M_BOTH_REC)
-METRICS_READING_ONLY = list(_M_READING_ONLY)
-METRICS_SUSTAINED_ONLY = list(_M_SUSTAINED_ONLY)
+                + _M_BOTH_FORMANT + _M_BOTH_STABILITY + _M_BOTH_REC)
+METRICS_READING_ONLY = list(_M_READING_ONLY) + list(_M_READING_PAUSE)
+METRICS_SUSTAINED_ONLY = list(_M_SUSTAINED_DISPERSION) + list(_M_SUSTAINED_ONLY)
 CANONICAL_METRICS = METRICS_BOTH + METRICS_READING_ONLY + METRICS_SUSTAINED_ONLY
 
 # Provenance / QC. Written to the CSV in a separate block, never plotted, never
@@ -5903,10 +5959,14 @@ assert len(CANONICAL_METRICS) == len(set(CANONICAL_METRICS)), "duplicate metric 
 # the VOICE - how much of the phonation was steady enough to measure - not
 # provenance, so they belong here and not in AUDIT_COLUMNS. The v6 parity count
 # is recorded in the message for continuity.
-assert len(CANONICAL_METRICS) == 103, (
-    f"canonical metric set must be 103 (97 v6-parity + 4 v18 coverage + "
-    f"1 uninterrupted MPT + 1 v19 decay rate), "
+# v21: + pitch_std_semitones + intensity_decay_db_per_s (reading) = 105. The
+# nine columns moved between blocks in v21 change the split, not the total.
+assert len(CANONICAL_METRICS) == 105, (
+    f"canonical metric set must be 105 (97 v6-parity + 4 v18 coverage + "
+    f"1 uninterrupted MPT + 1 v19 decay rate + 2 v21 reading measures), "
     f"got {len(CANONICAL_METRICS)}")
+assert (len(METRICS_BOTH), len(METRICS_READING_ONLY), len(METRICS_SUSTAINED_ONLY)) \
+    == (51, 28, 26), "v21 split must be 51 shared / 28 reading / 26 sustained"
 
 
 def _raw_metric_table(result: 'SpeechAnalysisResult') -> Dict[str, float]:
@@ -5992,6 +6052,9 @@ def _raw_metric_table(result: 'SpeechAnalysisResult') -> Dict[str, float]:
         "pitch_range_semitones": (sv.f0_range_semitones if (is_sust and _win_pitch)
                                   else pi.range_semitones),
         "pitch_cv": sv.f0_cv if (is_sust and _win_pitch) else pi.coefficient_of_variation,
+        # v21 (reading-only): SD of the semitone contour, i.e. monopitch. The
+        # sustained equivalent is sv_f0_sd_semitones, from the steady windows.
+        "pitch_std_semitones": pi.std_semitones,
         "voiced_percent": pi.voiced_frames_percent,
         "unvoiced_percent": pi.unvoiced_frames_percent,
         # ---- voice quality: ROBUST block ------------------------------------
@@ -6049,6 +6112,7 @@ def _raw_metric_table(result: 'SpeechAnalysisResult') -> Dict[str, float]:
         "articulation_rate_syll_per_s": rh.articulation_rate_syllables_per_sec,
         "syllable_count_used": rd.syllable_count_used,
         "speaking_time_fraction": rd.speaking_time_fraction,
+        "intensity_decay_db_per_s": rd.intensity_decay_db_per_s,
         "filler_count": f.count, "fillers_per_minute": f.fillers_per_minute,
         "filler_total_duration_s": f.total_duration,
         "filler_ratio_to_speech": f.ratio_to_speech,
@@ -6214,7 +6278,7 @@ def get_audit_table(result: 'SpeechAnalysisResult') -> Dict[str, float]:
 
 def get_metric_table(result: SpeechAnalysisResult) -> Dict[str, float]:
     """
-    The 97 canonical metrics, task-gated. Column order and membership are
+    The 105 canonical metrics, task-gated. Column order and membership are
     identical for every file, so the CSV is a rectangle; metrics that cannot
     mean anything for this file's task are NaN (blank in the CSV, skipped in the
     plots) rather than a number that would silently correlate an artifact with
@@ -6269,6 +6333,8 @@ METRIC_DIRECTION: Dict[str, Tuple[str, str]] = {
     "pitch_range_hz": ("around", "moderate range healthy; very small = monotone"),
     "pitch_cv": ("around", "natural read-speech F0 CV is moderate; very low = monotone"),
     "pitch_range_semitones": ("around", "moderate semitone range = expressive"),
+    "pitch_std_semitones": ("around", "F0 SD in semitones over the passage; LOW = monopitch "
+                                      "(hypokinetic), very high = check for tracking errors"),
     "pitch_octave_repair_fraction": ("lower", "fraction of frames corrected for octave errors; high value = check F0 range settings"),
     "voiced_percent": ("higher", "more voicing = more continuous phonation (within reason)"),
     "unvoiced_percent": ("lower", "less unvoiced = more continuous phonation"),
@@ -6320,6 +6386,8 @@ METRIC_DIRECTION: Dict[str, Tuple[str, str]] = {
     "vowel_dispersion_logarea": ("higher", "larger F1-F2 cloud = more articulatory expansion; SHRINKS with hypokinetic centralization"),
     "vowel_cloud_spread_hz": ("higher", "larger spread = more vowel differentiation; reduced in centralization"),
     "intensity_decay_db": ("around", "near 0 = steady loudness; strongly negative = hypokinetic loudness DECAY across passage"),
+    "intensity_decay_db_per_s": ("around", "dB per second of reading; near 0 = steady loudness, "
+                                           "negative = loudness decay, independent of reading speed"),
     "hnr_median_perinterval_db": ("higher", "higher = clearer voice (robust median complement to HNR)"),
     "cpps_db": ("higher", "higher CPPS = clearer, less dysphonic voice (robust severity correlate)"),
     "cpps_is_praat": ("higher", "1 = CPPS from Praat (trusted); 0 = FFT fallback (interpret cautiously)"),
@@ -6495,8 +6563,8 @@ METRIC_DIRECTION: Dict[str, Tuple[str, str]] = {
 OVERVIEW_METRICS_READING = [
     "cpps_db", "hnr_median_perinterval_db", "cpp_db",
     "speech_rate_syll_per_s", "speaking_time_fraction", "ems_3_8hz_ratio",
-    "vowel_dispersion_logarea", "intensity_decay_db", "intensity_nucleus_std_db",
-    "pitch_cv", "pause_ratio_to_speech", "fluency_overall",
+    "vowel_dispersion_logarea", "intensity_decay_db_per_s", "intensity_nucleus_std_db",
+    "pitch_std_semitones", "pause_ratio_to_speech", "fluency_overall",
 ]
 OVERVIEW_METRICS_SUSTAINED = [
     # robust first: these four are defined for every take, usable or not
@@ -6510,7 +6578,7 @@ OVERVIEW_METRICS_SUSTAINED = [
 ]
 
 
-# Curated per-task metric sets for the individual bar plots. The full 97-metric
+# Curated per-task metric sets for the individual bar plots. The full metric
 # table always goes to the CSV; plotting all of it buries the ~20 numbers that
 # carry the clinical signal. Use plot_scope="all" to plot every metric.
 #
@@ -6549,10 +6617,10 @@ CORE_METRICS_READING = [
     "cpps_db", "cpp_db", "hnr_db", "hnr_median_perinterval_db",
     "alpha_ratio_db", "hammarberg_index", "spectral_tilt_db_per_khz",
     "voiced_fraction", "f0_subharmonic_lock",
-    # --- perturbation (secondary on connected speech) -----------------------
-    "jitter_local_percent", "jitter_ppq5_percent",
-    "shimmer_local_db", "shimmer_apq11_percent",
-    "nhr", "voice_breaks_degree_percent",
+    # v21: jitter, shimmer, NHR and voice breaks are no longer plotted for
+    # reading. Cycle-to-cycle perturbation is only interpretable on stable
+    # phonation, and Praat counts every voiceless consonant as a voice break.
+    # They are still in the CSV.
     # --- rate and timing ----------------------------------------------------
     "duration_speech_s", "articulation_time_s", "phonation_time_s",
     "speech_rate_syll_per_s", "articulation_rate_syll_per_s",
@@ -6564,8 +6632,9 @@ CORE_METRICS_READING = [
     "ems_3_8hz_ratio", "ems_peak_freq_hz", "ems_syllabic_to_slow_ratio", "npvi",
     # --- loudness and prosody ----------------------------------------------
     "intensity_active_mean_db", "intensity_active_std_db",
-    "intensity_nucleus_std_db", "intensity_decay_db",
-    "pitch_mean_hz", "pitch_cv", "pitch_range_semitones", "voiced_percent",
+    "intensity_nucleus_std_db", "intensity_decay_db", "intensity_decay_db_per_s",
+    "pitch_mean_hz", "pitch_std_semitones", "pitch_cv", "pitch_range_semitones",
+    "voiced_percent",
     # --- articulation -------------------------------------------------------
     "f1_mean_hz", "f2_mean_hz", "vowel_space_area", "vowel_dispersion_logarea",
     "vowel_cloud_spread_hz",
@@ -6759,7 +6828,7 @@ def write_consolidated_csv(results, output_folder, output_prefix):
     """
     Wide matrix: one row per metric, one column per file.
 
-    v16: the file is now written in two clearly labelled blocks - the 97
+    v16: the file is now written in two clearly labelled blocks - the
     canonical METRICS, then the AUDIT columns (settings used, octave verdict,
     window-rejection counts, usability gate, recording properties). Mixing the
     two, as earlier versions did, invites a provenance column into a statistical
@@ -6836,7 +6905,7 @@ def write_consolidated_csv(results, output_folder, output_prefix):
                                else f"{v:.6g}")
                 writer.writerow(row)
 
-        # ---- BLOCK 1: the 97 canonical metrics ------------------------------
+        # ---- BLOCK 1: the canonical metrics ---------------------------------
         writer.writerow([f"### METRICS ({len(metric_names)}) - measurements of the voice",
                          "", ""] + [""] * len(file_labels))
         _emit(metric_names, tables)
@@ -7530,6 +7599,29 @@ def analyze_files(wav_files, output_folder, output_prefix="speech_analysis",
     on_aggregation: "all" | "median" | "best" (see build_per_stim_columns).
     """
     wav_files = expand_to_wav_files(wav_files)
+    # ---- v21: keep DDK trials out of the acoustic pipeline ------------------
+    # Filtered BEFORE pitch calibration, so a DDK trial cannot move the batch
+    # pitch range either. With task="auto" they are skipped; with a forced task
+    # the user chose explicitly, so they are analysed, but flagged.
+    ddk_like = [f for f in wav_files if looks_like_ddk(f)]
+    if ddk_like:
+        forced = str(task).lower() in (TASK_SUSTAINED, TASK_READING)
+        print(f"\nWARNING: {len(ddk_like)} file(s) look like DDK trials "
+              f"(ddk / pataka / amr / smr / diadoch... in the name or folder):")
+        for f in ddk_like[:8]:
+            print(f"    {f}")
+        if len(ddk_like) > 8:
+            print(f"    ... and {len(ddk_like) - 8} more")
+        if forced:
+            print(f"  task is forced to '{task}', so they WILL be analysed as {task}. "
+                  "Reading or phonation metrics on a diadochokinetic task have no "
+                  "clinical meaning; run them through the DDK stage instead.")
+        else:
+            print("  skipped: the reading / sustained-vowel router cannot recognise a "
+                  "DDK task and would analyse them as reading. Use the DDK stage "
+                  "(python -m speechkit ddk) for these files.")
+            skip = set(ddk_like)
+            wav_files = [f for f in wav_files if f not in skip]
     if not wav_files:
         print("No .wav files to analyze."); return []
     output_path = Path(output_folder); output_path.mkdir(parents=True, exist_ok=True)

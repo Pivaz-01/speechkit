@@ -47,14 +47,11 @@ speaker01_caterpillar,99999999,caterpillar,other,,reading,,f3_std_hz,365.683,low
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,voiced_fraction,0.503168,higher
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,f0_subharmonic_lock,0,lower
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,f0_lock_semitones,-0.00982665,lower
-speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_count,24,lower
-speaker01_caterpillar,99999999,caterpillar,other,,reading,,pauses_per_minute,23.4154,lower
-speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_total_duration_s,9.57823,lower
-speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_mean_duration_s,0.399093,lower
-speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_ratio_to_speech,0.184481,lower
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,rec_quality_score,99.9986,higher
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,rec_snr_db,35.5306,higher
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,rec_clipping_fraction,7.08191e-07,lower
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pitch_std_semitones,2.10685,around
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,intensity_decay_db_per_s,-0.00132318,around
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,speech_rate_syll_per_s,4.22778,around
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,articulation_rate_syll_per_s,5.00772,around
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,syllable_count_used,260,neutral
@@ -70,3 +67,8 @@ speaker01_caterpillar,99999999,caterpillar,other,,reading,,npvi,53.5321,around
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,vowel_space_area,549929,higher
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,vowel_dispersion_logarea,12.597,higher
 speaker01_caterpillar,99999999,caterpillar,other,,reading,,vowel_cloud_spread_hz,306.788,higher
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_count,24,lower
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pauses_per_minute,23.4154,lower
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_total_duration_s,9.57823,lower
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_mean_duration_s,0.399093,lower
+speaker01_caterpillar,99999999,caterpillar,other,,reading,,pause_ratio_to_speech,0.184481,lower
